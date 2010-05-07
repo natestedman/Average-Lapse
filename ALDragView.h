@@ -27,18 +27,10 @@ or implied, of Nate Stedman.
 */
 
 #import <Cocoa/Cocoa.h>
+#import "ALWindowController.h"
 
-
-@interface ALWindowController : NSWindowController {
-    IBOutlet NSView* mainView;
-    IBOutlet NSView* dropView;
-    IBOutlet NSView* progressView;
-    IBOutlet NSLevelIndicator* progressBar;
-    IBOutlet NSImageView* imageView;
+@interface ALDragView : NSView {
+    IBOutlet ALWindowController* windowController;
 }
-
--(void)generate:(NSArray*)files;
--(void)thread:(NSArray*)array;
--(void)threadMovie:(NSArray*)array;
 
 @end

@@ -26,19 +26,60 @@ authors and should not be interpreted as representing official policies, either 
 or implied, of Nate Stedman.
 */
 
-#import <Cocoa/Cocoa.h>
+#import "ALDragView.h"
 
 
-@interface ALWindowController : NSWindowController {
-    IBOutlet NSView* mainView;
-    IBOutlet NSView* dropView;
-    IBOutlet NSView* progressView;
-    IBOutlet NSLevelIndicator* progressBar;
-    IBOutlet NSImageView* imageView;
+@implementation ALDragView
+
+- (id)initWithFrame:(NSRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    }
+    return self;
 }
 
--(void)generate:(NSArray*)files;
--(void)thread:(NSArray*)array;
--(void)threadMovie:(NSArray*)array;
+- (void)drawRect:(NSRect)dirtyRect {
+    // Drawing code here.
+}
+
+#pragma mark -
+#pragma mark Dragging
+
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender {
+    return NSDragOperationGeneric;
+}
+
+- (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender {
+    return NSDragOperationGeneric;
+}
+
+- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender {
+    return YES;
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender {
+    NSPasteboard* board = [sender draggingPasteboard];
+    
+    // make an array for the files
+    NSMutableArray* files = [[NSMutableArray alloc] initWithCapacity:[[board pasteboardItems] count]];
+    
+    // get all of the filenames
+    for (NSPasteboardItem* item in [board pasteboardItems]) {
+        [files addObject:[item stringForType:@"public.file-url"]];
+    }
+    
+    // sort the files
+    [files sortUsingSelector:@selector(compare:)];
+    
+    // start generating the average lapse
+    [windowController generate:files];
+    
+    return YES;
+}
+
+- (void)concludeDragOperation:(id <NSDraggingInfo>)sender {
+    
+}
 
 @end
