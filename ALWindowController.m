@@ -62,7 +62,7 @@ or implied, of Nate Stedman.
                          
                          NSURL* url = [NSURL URLWithString:[files objectAtIndex:0]];
                          NSLog(@"%@", url);
-                         if ([QTMovie canInitWithURL:url]) {
+                         if (![QTMovie canInitWithURL:url]) {
                              NSLog(@"Rendering a movie");
                              QTMovie* movie = [[QTMovie alloc] initWithFile:[url path] error:nil];
                              [self performSelectorInBackground:@selector(threadMovie:)
@@ -103,6 +103,7 @@ or implied, of Nate Stedman.
         // load the image
         NSData* data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:i]]];
         NSBitmapImageRep* image = [[NSBitmapImageRep alloc] initWithData:data];
+        unsigned char * bitmap = [image bitmapData];
         if (image == nil) {
             [lock lock];
             [progressBar setIntValue:i + 1];
@@ -118,30 +119,26 @@ or implied, of Nate Stedman.
             b = (double*)malloc(sizeof(double) * size);
             
             for (int i = 0; i < size; i++) {
-                NSColor* color = [image colorAtX:i % [image pixelsWide] y:i / [image pixelsWide]];
-                r[i] = (double)[color redComponent];
-                g[i] = (double)[color greenComponent];
-                b[i] = (double)[color blueComponent];
+                r[i] = bitmap[(i * 4) + 0] / 255.0;
+                g[i] = bitmap[(i * 4) + 1] / 255.0;
+                b[i] = bitmap[(i * 4) + 2] / 255.0;
             }
             started = YES;
         }
         
         // otherwise, average the images
         else {
+            #pragma omp parallel for
             for (int i = 0; i < size; i++) {
                 // average this images color with the previous colors
-                NSColor* color = [image colorAtX:i % [image pixelsWide] y:i / [image pixelsWide]];
-                r[i] = (r[i] * imageCount + (double)[color redComponent]) / (double)(imageCount + 1);
-                g[i] = (g[i] * imageCount + (double)[color greenComponent]) / (double)(imageCount + 1);
-                b[i] = (b[i] * imageCount + (double)[color blueComponent]) / (double)(imageCount + 1);
+                r[i] = (r[i] * imageCount + ((double)bitmap[(i * 4) + 0] / 255.0)) / (double)(imageCount + 1);
+                g[i] = (g[i] * imageCount + ((double)bitmap[(i * 4) + 1] / 255.0)) / (double)(imageCount + 1);
+                b[i] = (b[i] * imageCount + ((double)bitmap[(i * 4) + 2] / 255.0)) / (double)(imageCount + 1);
                 
                 // write the color back to the image, as we're done with this pixel
-                [image setColor:[NSColor colorWithCalibratedRed:(float)r[i]
-                                                          green:(float)g[i]
-                                                           blue:(float)b[i]
-                                                          alpha:1]
-                            atX:i % [image pixelsWide]
-                              y:i / [image pixelsWide]];
+                bitmap[(i * 4) + 0] = r[i] * 255;
+                bitmap[(i * 4) + 1] = g[i] * 255;
+                bitmap[(i * 4) + 2] = b[i] * 255;
             }
         }
         
