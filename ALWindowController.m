@@ -50,6 +50,9 @@ or implied, of Nate Stedman.
     [open setPrompt:@"Render"];
     [open setTitle:@"Select an output directory"];
     
+    // raise the window
+    [NSApp activateIgnoringOtherApps:YES];
+    
     // run the sheet
     [open beginSheetModalForWindow:[self window]
                  completionHandler:^(NSInteger result) {
