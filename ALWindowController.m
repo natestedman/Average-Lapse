@@ -90,24 +90,24 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
 -(void)thread:(NSDictionary*)threadData {
-    // set up
     NSAutoreleasePool* release = [[NSAutoreleasePool alloc] init];
     NSLock* lock = [[NSLock alloc] init];
     BOOL started = NO;
     int size;
-    long long *accumulator = nil;
+    long long* accumulator = nil;
     int imageCount = 0, totalFrameCount = 0;
     int imageWidth, imageHeight;
+    QTMovie* movie;
     
-    // extract data from the array
+    // extract data from the dictionary
     NSArray* files = [threadData objectForKey:@"files"];
     NSURL* folder = [threadData objectForKey:@"outputURL"];
     BOOL isVideo = [[threadData objectForKey:@"type"] isEqualToString:@"video"];
-    QTMovie* movie;
     
     dispatch_queue_t q_default = dispatch_get_global_queue(0, 0);
     
     if (isVideo) {
+        // load the video
         [QTMovie enterQTKitOnThread];
         movie = [[QTMovie alloc] initWithFile:[[NSURL URLWithString:[files lastObject]] path] error:nil];
         
@@ -140,11 +140,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             NSLog(@"%@", [files objectAtIndex:frame]);
         }
         
-        // load the image
+        // load the frame, either from the video or from the file
         if (isVideo) {
             NSImage * img = [movie frameImageAtTime:QTMakeTime(frame, [movie duration].timeScale)];
             image = [[NSBitmapImageRep alloc] initWithData:[img TIFFRepresentation]];
-            //[img release];
         }
         else {
             NSData* data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:frame]]];
@@ -197,9 +196,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
             [image release];
             
-            [lock lock];
             // TODO: I think that the displayed picture might be wrong at some point
             // because we're doing this asynchronously. Do we care?
+            [lock lock];
             [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
             [lock unlock];
         });
