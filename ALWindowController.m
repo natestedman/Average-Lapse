@@ -85,6 +85,8 @@ or implied, of Nate Stedman.
     NSLock* lock = [[NSLock alloc] init];
     BOOL started = NO;
     int size;
+    double *r, *g, *b;
+    int imageCount = 0;
     
     // extract data from the array
     NSArray* files = [array objectAtIndex:0];
@@ -93,9 +95,6 @@ or implied, of Nate Stedman.
     [lock lock];
     [progressBar setMaxValue:[files count]];
     [lock unlock];
-    
-    double *r, *g, *b;
-    int imageCount = 0;
     
     for (int i = 0; i < [files count]; i++) {
         NSLog(@"%@", [NSURL URLWithString:[files objectAtIndex:0]]);
@@ -169,6 +168,10 @@ or implied, of Nate Stedman.
     NSLock* lock = [[NSLock alloc] init];
     BOOL started = NO;
     int size;
+    double *r, *g, *b;
+    int imageCount = 0;
+    int i = 0;
+    
     [QTMovie enterQTKitOnThread];
     
     // extract data from the array
@@ -180,12 +183,8 @@ or implied, of Nate Stedman.
     [progressBar setMaxValue:[movie duration].timeValue];
     [lock unlock];
     
-    double *r, *g, *b;
-    int imageCount = 0;
-    
     NSLog(@"%f", [movie duration].timeValue);
-    
-    int i = 0;
+
     for (double time = 0; time < [movie duration].timeValue; time += 1./3.) {
         
         // get the frame's image
