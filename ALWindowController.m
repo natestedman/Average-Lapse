@@ -186,7 +186,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             
             accumulator = (long long*)calloc(size * 4, sizeof(long long));
             
-            #pragma omp parallel for shared(r, g, b, bitmap)
+            #pragma omp parallel for shared(bitmap, accumulator)
             for (int i = 0; i < size * 4; i++) {
                 accumulator[i] = bitmap[i];
             }
@@ -194,7 +194,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             started = YES;
         }
         else { // otherwise, average the images
-            #pragma omp parallel for shared(r, g, b, bitmap)
+            #pragma omp parallel for shared(bitmap, accumulator)
             for (int i = 0; i < size * 4; i++) {
                 // average this image's color with the previous colors
                 bitmap[i] = accumulator[i] = (accumulator[i] * imageCount + bitmap[i]) / (imageCount + 1);
@@ -231,7 +231,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         // Build and output the last frame
         if (!buildAll) {
             NSData* saveData = [lastImage representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
-            [saveData writeToURL:[folder URLByAppendingPathComponent:@"Average Lapse Final Frame"] atomically:YES];
+            [saveData writeToURL:[folder URLByAppendingPathComponent:@"Average Lapse Final Frame.jpg"] atomically:YES];
         }
         
         [lastImage release];
