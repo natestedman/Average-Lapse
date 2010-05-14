@@ -62,7 +62,7 @@ or implied, of Nate Stedman.
     NSPasteboard* board = [sender draggingPasteboard];
     
     // make an array for the files
-    NSMutableArray* files = [[NSMutableArray alloc] initWithCapacity:[[board pasteboardItems] count]];
+    NSMutableArray* files = [[[NSMutableArray alloc] initWithCapacity:[[board pasteboardItems] count]] autorelease];
     
     // get all of the filenames
     for (NSPasteboardItem* item in [board pasteboardItems]) {
