@@ -64,8 +64,7 @@ or implied, of Nate Stedman.
                          NSImage* testImage = [[NSImage alloc] initWithContentsOfURL:url];
                          
                          if (!testImage) {
-                             if (![QTMovie canInitWithURL:url])
-                             {
+                             if (![QTMovie canInitWithURL:url]) {
                                  NSLog(@"Unknown file type. Must be image or video.");
                              }
                              
