@@ -191,7 +191,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             started = YES;
         }
         else { // otherwise, average the images
-            #pragma omp parallel for shared(bitmap, accumulator)
             dispatch_apply(imageHeight, dispatchQueue, ^(size_t y){
                 for (size_t i = y; i < y + (imageWidth * 4); i++) {
                     // average this image's color with the previous colors
