@@ -128,24 +128,24 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [progressBar setMaxValue:totalFrameCount];
     [lock unlock];
     
-    for (int i = 0; i < totalFrameCount; i++) {
+    for (int frame = 0; frame < totalFrameCount; frame++) {
         unsigned char* bitmap;
         NSBitmapImageRep* image;
         NSString* outputFilename;
         NSData* saveData;
         
         if (!isVideo) {
-            NSLog(@"%@", [files objectAtIndex:i]);
+            NSLog(@"%@", [files objectAtIndex:frame]);
         }
         
         // load the image
         if (isVideo) {
-            NSImage * img = [movie frameImageAtTime:QTMakeTime(i, [movie duration].timeScale)];
+            NSImage * img = [movie frameImageAtTime:QTMakeTime(frame, [movie duration].timeScale)];
             image = [[NSBitmapImageRep alloc] initWithData:[img TIFFRepresentation]];
             //[img release];
         }
         else {
-            NSData* data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:i]]];
+            NSData* data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:frame]]];
             image = [[NSBitmapImageRep alloc] initWithData:data];
             [data release];
         }
@@ -153,7 +153,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         if (image == nil) {
             NSLog(@"Skipped (couldn't load image).");
             [lock lock];
-            [progressBar setIntValue:i + 1];
+            [progressBar setIntValue:frame + 1];
             [lock unlock];
             continue;
         }
@@ -163,7 +163,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
              imageHeight != [image pixelsHigh])) {
             NSLog(@"Skipped (size doesn't match).");
             [lock lock];
-            [progressBar setIntValue:i + 1];
+            [progressBar setIntValue:frame + 1];
             [lock unlock];
             [image release];
             continue;
@@ -181,6 +181,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             g = (long long*)malloc(sizeof(long long) * size);
             b = (long long*)malloc(sizeof(long long) * size);
             
+            #pragma omp parallel for
             for (int i = 0; i < size; i++) {
                 r[i] = bitmap[(i * 4) + 0];
                 g[i] = bitmap[(i * 4) + 1];
@@ -200,6 +201,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 bitmap[(i * 4) + 0] = r[i];
                 bitmap[(i * 4) + 1] = g[i];
                 bitmap[(i * 4) + 2] = b[i];
+                
+                if(i % imageWidth == 0) {
+                    [lock lock];
+                    [progressBar setDoubleValue:frame + ((double)i / (double)size)];
+                    [lock unlock];
+                }
             }
         }
         
@@ -210,7 +217,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
         
         [lock lock];
-        [progressBar setIntValue:i + 1];
+        [progressBar setIntValue:frame + 1];
         [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
         [lock unlock];
         
