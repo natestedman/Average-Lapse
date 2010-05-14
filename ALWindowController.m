@@ -217,13 +217,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         [image release];
     }
     
-    if (r == nil) {
+    if (r != nil) {
         free(r);
     }
-    if (g == nil) {
+    if (g != nil) {
         free(g);
     }
-    if (b == nil) {
+    if (b != nil) {
         free(b);
     }
     
