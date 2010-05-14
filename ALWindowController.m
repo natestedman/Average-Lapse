@@ -126,6 +126,7 @@ or implied, of Nate Stedman.
             [lock lock];
             [progressBar setIntValue:i + 1];
             [lock unlock];
+            [image release];
             continue;
         }
         
@@ -148,9 +149,7 @@ or implied, of Nate Stedman.
             }
             started = YES;
         }
-        
-        // otherwise, average the images
-        else {
+        else { // otherwise, average the images
             #pragma omp parallel for
             for (int i = 0; i < size; i++) {
                 // average this image's color with the previous colors
