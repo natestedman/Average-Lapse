@@ -102,6 +102,8 @@ or implied, of Nate Stedman.
         // load the image
         NSData* data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:i]]];
         NSBitmapImageRep* image = [[NSBitmapImageRep alloc] initWithData:data];
+        [data release];
+        
         unsigned char * bitmap = [image bitmapData];
         if (image == nil) {
             [lock lock];
@@ -144,6 +146,7 @@ or implied, of Nate Stedman.
         imageCount++;
         
         NSData* save = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
+        [image release];
         
         NSString* str = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
         
@@ -159,6 +162,7 @@ or implied, of Nate Stedman.
     free(g);
     free(b);
     
+    [lock release];
     [release release];
 }
 
@@ -183,9 +187,10 @@ or implied, of Nate Stedman.
     [progressBar setMaxValue:[movie duration].timeValue];
     [lock unlock];
     
-    NSLog(@"%f", [movie duration].timeValue);
+    NSLog(@"%lld", [movie duration].timeValue);
 
-    for (double time = 0; time < [movie duration].timeValue; time += 1./3.) {
+    // TODO: fix time increment, etc.
+    for (long long time = 0; time < [movie duration].timeValue; time += 1) {
         
         // get the frame's image
         NSImage* img = [movie frameImageAtTime:QTMakeTime(time, 1)];
@@ -229,6 +234,7 @@ or implied, of Nate Stedman.
         imageCount++;
         
         NSData* save = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
+        [image release];
         
         NSString* str = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", i];
         
@@ -246,6 +252,7 @@ or implied, of Nate Stedman.
     free(b);
     
     [QTMovie exitQTKitOnThread];
+    [lock release];
     [release release];
 }
 
