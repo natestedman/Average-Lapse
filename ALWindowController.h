@@ -38,7 +38,6 @@ or implied, of Nate Stedman.
 }
 
 -(void)generate:(NSArray*)files;
--(void)thread:(NSArray*)array;
--(void)threadMovie:(NSArray*)array;
+-(void)thread:(NSDictionary*)threadData;
 
 @end

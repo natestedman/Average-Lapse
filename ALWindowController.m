@@ -62,6 +62,10 @@ or implied, of Nate Stedman.
                          
                          NSURL* url = [NSURL URLWithString:[files objectAtIndex:0]];
                          NSImage* testImage = [[NSImage alloc] initWithContentsOfURL:url];
+                         NSMutableDictionary* threadData = [[NSMutableDictionary alloc] init];
+                         
+                         [threadData setObject:files forKey:@"files"];
+                         [threadData setObject:[[open URLs] lastObject] forKey:@"outputURL"];
                          
                          if (!testImage) {
                              if (![QTMovie canInitWithURL:url]) {
@@ -69,15 +73,20 @@ or implied, of Nate Stedman.
                              }
                              
                              NSLog(@"Rendering a movie");
-                             QTMovie* movie = [[QTMovie alloc] initWithFile:[url path] error:nil];
-                             [self performSelectorInBackground:@selector(threadMovie:)
-                                                    withObject:[NSArray arrayWithObjects:movie, [[open URLs] objectAtIndex:0], nil]];
+                             [threadData setObject:@"video" forKey:@"type"];
+                             
+                             //QTMovie* movie = [[QTMovie alloc] initWithFile:[url path] error:nil];
+                             [self performSelectorInBackground:@selector(thread:)
+                                                    withObject:threadData];
                          }
                          else {
                              [testImage release];
+                             
                              NSLog(@"Rendering an image series");
+                             [threadData setObject:@"image" forKey:@"type"];
+                             
                              [self performSelectorInBackground:@selector(thread:)
-                                                    withObject:[NSArray arrayWithObjects:files, [[open URLs] objectAtIndex:0], nil]];
+                                                    withObject:threadData];
                          }
 
                      }
@@ -85,37 +94,65 @@ or implied, of Nate Stedman.
     
 }
 
--(void)thread:(NSArray*)array {
+-(void)thread:(NSDictionary*)threadData {
     // set up
     NSAutoreleasePool* release = [[NSAutoreleasePool alloc] init];
     NSLock* lock = [[NSLock alloc] init];
     BOOL started = NO;
     int size;
-    long long *r, *g, *b;
-    int imageCount = 0;
+    long long *r = nil, *g = nil, *b = nil;
+    int imageCount = 0, totalFrameCount = 0;
     int imageWidth, imageHeight;
     
     // extract data from the array
-    NSArray* files = [array objectAtIndex:0];
-    NSURL* folder = [array objectAtIndex:1];
+    NSArray* files = [threadData objectForKey:@"files"];
+    NSURL* folder = [threadData objectForKey:@"outputURL"];
+    BOOL isVideo = [[threadData objectForKey:@"type"] isEqualToString:@"video"];
+    QTMovie* movie;
+    
+    if (isVideo) {
+        [QTMovie enterQTKitOnThread];
+        movie = [[QTMovie alloc] initWithFile:[[NSURL URLWithString:[files lastObject]] path] error:nil];
+        
+        if (movie == nil) {
+            NSLog(@"Failed to load video.");
+            [lock release];
+            [release release];
+            return;
+        }
+        
+        totalFrameCount = [movie duration].timeValue;
+    }
+    else {
+        totalFrameCount = [files count];
+    }
+
     
     [lock lock];
-    [progressBar setMaxValue:[files count]];
+    [progressBar setMaxValue:totalFrameCount];
     [lock unlock];
     
-    for (int i = 0; i < [files count]; i++) {
+    for (int i = 0; i < totalFrameCount; i++) {
         unsigned char* bitmap;
-        NSData* data;
         NSBitmapImageRep* image;
         NSString* outputFilename;
         NSData* saveData;
         
-        NSLog(@"%@", [files objectAtIndex:i]);
+        if (!isVideo) {
+            NSLog(@"%@", [files objectAtIndex:i]);
+        }
         
         // load the image
-        data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:i]]];
-        image = [[NSBitmapImageRep alloc] initWithData:data];
-        [data release];
+        if (isVideo) {
+            NSImage * img = [movie frameImageAtTime:QTMakeTime(i, [movie duration].timeScale)];
+            image = [[NSBitmapImageRep alloc] initWithData:[img TIFFRepresentation]];
+            //[img release];
+        }
+        else {
+            NSData* data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:i]]];
+            image = [[NSBitmapImageRep alloc] initWithData:data];
+            [data release];
+        }
         
         if (image == nil) {
             NSLog(@"Skipped (couldn't load image).");
@@ -184,100 +221,16 @@ or implied, of Nate Stedman.
         [image release];
     }
     
-    free(r);
-    free(g);
-    free(b);
-    
-    [lock release];
-    [release release];
-}
-
--(void)threadMovie:(NSArray*)array {
-    // set up
-    NSAutoreleasePool* release = [[NSAutoreleasePool alloc] init];
-    NSLock* lock = [[NSLock alloc] init];
-    BOOL started = NO;
-    int size;
-    double *r, *g, *b;
-    int imageCount = 0;
-    int i = 0;
-    
-    [QTMovie enterQTKitOnThread];
-    
-    // extract data from the array
-    QTMovie* movie = [array objectAtIndex:0];
-    [movie attachToCurrentThread];
-    NSURL* folder = [array objectAtIndex:1];
-    
-    [lock lock];
-    [progressBar setMaxValue:[movie duration].timeValue];
-    [lock unlock];
-    
-    NSLog(@"%lld", [movie duration].timeValue);
-
-    // TODO: fix time increment, etc.
-    for (long long time = 0; time < [movie duration].timeValue; time += 1) {
-        
-        // get the frame's image
-        NSImage* img = [movie frameImageAtTime:QTMakeTime(time, 1)];
-        NSBitmapImageRep* image = [[NSBitmapImageRep alloc] initWithData:[img TIFFRepresentation]];
-        
-        // if this is the first image, initialize the arrays
-        if (!started) {
-            size = [image pixelsHigh] * [image pixelsWide];
-            r = (double*)malloc(sizeof(double) * size);
-            g = (double*)malloc(sizeof(double) * size);
-            b = (double*)malloc(sizeof(double) * size);
-            
-            for (int i = 0; i < size; i++) {
-                NSColor* color = [image colorAtX:i % [image pixelsWide] y:i / [image pixelsWide]];
-                r[i] = (double)[color redComponent];
-                g[i] = (double)[color greenComponent];
-                b[i] = (double)[color blueComponent];
-            }
-            started = YES;
-        }
-        
-        // otherwise, average the images
-        else {
-            for (int i = 0; i < size; i++) {
-                // average this images color with the previous colors
-                NSColor* color = [image colorAtX:i % [image pixelsWide] y:i / [image pixelsWide]];
-                r[i] = (r[i] * imageCount + (double)[color redComponent]) / (double)(imageCount + 1);
-                g[i] = (g[i] * imageCount + (double)[color greenComponent]) / (double)(imageCount + 1);
-                b[i] = (b[i] * imageCount + (double)[color blueComponent]) / (double)(imageCount + 1);
-                
-                // write the color back to the image, as we're done with this pixel
-                [image setColor:[NSColor colorWithCalibratedRed:(float)r[i]
-                                                          green:(float)g[i]
-                                                           blue:(float)b[i]
-                                                          alpha:1]
-                            atX:i % [image pixelsWide]
-                              y:i / [image pixelsWide]];
-            }
-        }
-        
-        imageCount++;
-        
-        NSData* save = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
-        [image release];
-        
-        NSString* str = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", i];
-        
-        [save writeToURL:[folder URLByAppendingPathComponent:str] atomically:YES];
-        
-        [lock lock];
-        [progressBar setIntValue:time];
-        [lock unlock];
-        
-        i++;
+    if (r == nil) {
+        free(r);
+    }
+    if (g == nil) {
+        free(g);
+    }
+    if (b == nil) {
+        free(b);
     }
     
-    free(r);
-    free(g);
-    free(b);
-    
-    [QTMovie exitQTKitOnThread];
     [lock release];
     [release release];
 }
