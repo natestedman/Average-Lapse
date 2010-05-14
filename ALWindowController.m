@@ -71,7 +71,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                              NSLog(@"Rendering a movie");
                              [threadData setObject:@"video" forKey:@"type"];
                              
-                             //QTMovie* movie = [[QTMovie alloc] initWithFile:[url path] error:nil];
                              [self performSelectorInBackground:@selector(thread:)
                                                     withObject:threadData];
                          }
