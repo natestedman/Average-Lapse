@@ -106,6 +106,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     BOOL isVideo = [[threadData objectForKey:@"type"] isEqualToString:@"video"];
     QTMovie* movie;
     
+    dispatch_queue_t q_default = dispatch_get_global_queue(0, 0);
+    
     if (isVideo) {
         [QTMovie enterQTKitOnThread];
         movie = [[QTMovie alloc] initWithFile:[[NSURL URLWithString:[files lastObject]] path] error:nil];
@@ -131,8 +133,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     for (int frame = 0; frame < totalFrameCount; frame++) {
         unsigned char* bitmap;
         NSBitmapImageRep* image;
-        NSString* outputFilename;
-        NSData* saveData;
         
         if (!isVideo) {
             NSLog(@"%@", [files objectAtIndex:frame]);
@@ -181,7 +181,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             g = (long long*)malloc(sizeof(long long) * size);
             b = (long long*)malloc(sizeof(long long) * size);
             
-            #pragma omp parallel for
+            #pragma omp parallel for shared(r, g, b, bitmap)
             for (int i = 0; i < size; i++) {
                 r[i] = bitmap[(i * 4) + 0];
                 g[i] = bitmap[(i * 4) + 1];
@@ -190,7 +190,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             started = YES;
         }
         else { // otherwise, average the images
-            #pragma omp parallel for
+            #pragma omp parallel for shared(r, g, b, bitmap)
             for (int i = 0; i < size; i++) {
                 // average this image's color with the previous colors
                 r[i] = (r[i] * imageCount + bitmap[(i * 4) + 0]) / (imageCount + 1);
@@ -201,27 +201,22 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 bitmap[(i * 4) + 0] = r[i];
                 bitmap[(i * 4) + 1] = g[i];
                 bitmap[(i * 4) + 2] = b[i];
-                
-                if(i % imageWidth == 0) {
-                    [lock lock];
-                    [progressBar setDoubleValue:frame + ((double)i / (double)size)];
-                    [lock unlock];
-                }
             }
         }
         
         imageCount++;
         
-        saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
-        outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
-        [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
-        
-        [lock lock];
-        [progressBar setIntValue:frame + 1];
-        [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
-        [lock unlock];
-        
-        [image release];
+        dispatch_async(q_default, ^{
+            NSData* saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
+            NSString* outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
+            [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
+            [image release];
+            
+            [lock lock];
+            [progressBar setIntValue:frame + 1];
+            [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
+            [lock unlock];
+        });
     }
     
     if (r != nil) {
