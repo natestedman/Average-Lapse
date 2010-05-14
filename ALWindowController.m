@@ -124,7 +124,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     else {
         totalFrameCount = [files count];
     }
-
     
     [lock lock];
     [progressBar setMaxValue:totalFrameCount];
@@ -133,6 +132,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     for (int frame = 0; frame < totalFrameCount; frame++) {
         unsigned char* bitmap;
         NSBitmapImageRep* image;
+        
+        [lock lock];
+        [progressBar setIntValue:frame];
+        [lock unlock];
         
         if (!isVideo) {
             NSLog(@"%@", [files objectAtIndex:frame]);
@@ -152,9 +155,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         
         if (image == nil) {
             NSLog(@"Skipped (couldn't load image).");
-            [lock lock];
-            [progressBar setIntValue:frame + 1];
-            [lock unlock];
             continue;
         }
         
@@ -162,9 +162,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             (imageWidth != [image pixelsWide] ||
              imageHeight != [image pixelsHigh])) {
             NSLog(@"Skipped (size doesn't match).");
-            [lock lock];
-            [progressBar setIntValue:frame + 1];
-            [lock unlock];
             [image release];
             continue;
         }
@@ -202,7 +199,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             [image release];
             
             [lock lock];
-            [progressBar setIntValue:frame + 1];
+            // TODO: I think that the displayed picture might be wrong at some point
+            // because we're doing this asynchronously. Do we care?
             [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
             [lock unlock];
         });
@@ -212,12 +210,16 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         free(accumulator);
     }
     
-    [lock release];
-    [release release];
-    
     if (isVideo) {
         [movie release];
     }
+    
+    [lock lock];
+    [progressBar setIntValue:[progressBar maxValue]];
+    [lock unlock];
+    
+    [lock release];
+    [release release];
 }
 
 @end
