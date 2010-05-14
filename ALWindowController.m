@@ -104,7 +104,7 @@ or implied, of Nate Stedman.
         NSString* outputFilename;
         NSData* saveData;
         
-        NSLog(@"%@", [NSURL URLWithString:[files objectAtIndex:0]]);
+        NSLog(@"%@", [files objectAtIndex:i]);
         
         // load the image
         data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:i]]];
