@@ -61,14 +61,21 @@ or implied, of Nate Stedman.
                          [mainView setSubviews:[NSArray arrayWithObject:progressView]];
                          
                          NSURL* url = [NSURL URLWithString:[files objectAtIndex:0]];
-                         NSLog(@"%@", url);
-                         if (![QTMovie canInitWithURL:url]) {
+                         NSImage* testImage = [[NSImage alloc] initWithContentsOfURL:url];
+                         
+                         if (!testImage) {
+                             if (![QTMovie canInitWithURL:url])
+                             {
+                                 NSLog(@"Unknown file type. Must be image or video.");
+                             }
+                             
                              NSLog(@"Rendering a movie");
                              QTMovie* movie = [[QTMovie alloc] initWithFile:[url path] error:nil];
                              [self performSelectorInBackground:@selector(threadMovie:)
                                                     withObject:[NSArray arrayWithObjects:movie, [[open URLs] objectAtIndex:0], nil]];
                          }
                          else {
+                             [testImage release];
                              NSLog(@"Rendering an image series");
                              [self performSelectorInBackground:@selector(thread:)
                                                     withObject:[NSArray arrayWithObjects:files, [[open URLs] objectAtIndex:0], nil]];
