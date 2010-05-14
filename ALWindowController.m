@@ -85,7 +85,7 @@ or implied, of Nate Stedman.
     NSLock* lock = [[NSLock alloc] init];
     BOOL started = NO;
     int size;
-    double *r, *g, *b;
+    long long *r, *g, *b;
     int imageCount = 0;
     int imageWidth, imageHeight;
     
@@ -138,14 +138,14 @@ or implied, of Nate Stedman.
             imageHeight = [image pixelsHigh];
             size = imageWidth * imageHeight;
             
-            r = (double*)malloc(sizeof(double) * size);
-            g = (double*)malloc(sizeof(double) * size);
-            b = (double*)malloc(sizeof(double) * size);
+            r = (long long*)malloc(sizeof(long long) * size);
+            g = (long long*)malloc(sizeof(long long) * size);
+            b = (long long*)malloc(sizeof(long long) * size);
             
             for (int i = 0; i < size; i++) {
-                r[i] = bitmap[(i * 4) + 0] / 255.0;
-                g[i] = bitmap[(i * 4) + 1] / 255.0;
-                b[i] = bitmap[(i * 4) + 2] / 255.0;
+                r[i] = bitmap[(i * 4) + 0];
+                g[i] = bitmap[(i * 4) + 1];
+                b[i] = bitmap[(i * 4) + 2];
             }
             started = YES;
         }
@@ -153,14 +153,14 @@ or implied, of Nate Stedman.
             #pragma omp parallel for
             for (int i = 0; i < size; i++) {
                 // average this image's color with the previous colors
-                r[i] = (r[i] * imageCount + ((double)bitmap[(i * 4) + 0] / 255.0)) / (double)(imageCount + 1);
-                g[i] = (g[i] * imageCount + ((double)bitmap[(i * 4) + 1] / 255.0)) / (double)(imageCount + 1);
-                b[i] = (b[i] * imageCount + ((double)bitmap[(i * 4) + 2] / 255.0)) / (double)(imageCount + 1);
+                r[i] = (r[i] * imageCount + bitmap[(i * 4) + 0]) / (imageCount + 1);
+                g[i] = (g[i] * imageCount + bitmap[(i * 4) + 1]) / (imageCount + 1);
+                b[i] = (b[i] * imageCount + bitmap[(i * 4) + 2]) / (imageCount + 1);
                 
                 // write the color back to the image, as we're done with this pixel
-                bitmap[(i * 4) + 0] = r[i] * 255;
-                bitmap[(i * 4) + 1] = g[i] * 255;
-                bitmap[(i * 4) + 2] = b[i] * 255;
+                bitmap[(i * 4) + 0] = r[i];
+                bitmap[(i * 4) + 1] = g[i];
+                bitmap[(i * 4) + 2] = b[i];
             }
         }
         
