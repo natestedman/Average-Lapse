@@ -102,7 +102,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     NSLock* lock = [[NSLock alloc] init];
     BOOL started = NO;
     int size;
-    long long* accumulator = nil;
+    unsigned char* accumulator = nil;
     int imageCount = 0, totalFrameCount = 0;
     int imageWidth, imageHeight;
     QTMovie* movie;
@@ -180,13 +180,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             imageHeight = [image pixelsHigh];
             size = imageWidth * imageHeight;
             
-            accumulator = (long long*)calloc(size * 4, sizeof(long long));
+            accumulator = (unsigned char*)calloc(size * 4, sizeof(unsigned char));
             
-            dispatch_apply(imageHeight, dispatchQueue, ^(size_t y){
-                for (size_t i = (y * imageWidth * 4); i < (y * imageWidth * 4) + (imageWidth * 4); i++) {
-                    accumulator[i] = bitmap[i];
-                }
-            });
+            memcpy(accumulator, bitmap, size * 4);
             
             started = YES;
         }
@@ -194,9 +190,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             dispatch_apply(imageHeight, dispatchQueue, ^(size_t y){
                 for (size_t i = (y * imageWidth * 4); i < (y * imageWidth * 4) + (imageWidth * 4); i++) {
                     // average this image's color with the previous colors
-                    bitmap[i] = accumulator[i] = (accumulator[i] * imageCount + bitmap[i]) / (imageCount + 1);
+                    accumulator[i] = (accumulator[i] * imageCount + bitmap[i]) / (imageCount + 1);
                 }
             });
+            
+            memcpy(bitmap, accumulator, size * 4);
         }
         
         imageCount++;
