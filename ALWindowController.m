@@ -97,20 +97,27 @@ or implied, of Nate Stedman.
     [lock unlock];
     
     for (int i = 0; i < [files count]; i++) {
+        unsigned char* bitmap;
+        NSData* data;
+        NSBitmapImageRep* image;
+        NSString* outputFilename;
+        NSData* saveData;
+        
         NSLog(@"%@", [NSURL URLWithString:[files objectAtIndex:0]]);
         
         // load the image
-        NSData* data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:i]]];
-        NSBitmapImageRep* image = [[NSBitmapImageRep alloc] initWithData:data];
+        data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:i]]];
+        image = [[NSBitmapImageRep alloc] initWithData:data];
         [data release];
         
-        unsigned char * bitmap = [image bitmapData];
         if (image == nil) {
             [lock lock];
             [progressBar setIntValue:i + 1];
             [lock unlock];
             continue;
         }
+        
+        bitmap = [image bitmapData];
         
         // if this is the first image, initialize the arrays
         if (!started) {
@@ -131,7 +138,7 @@ or implied, of Nate Stedman.
         else {
             #pragma omp parallel for
             for (int i = 0; i < size; i++) {
-                // average this images color with the previous colors
+                // average this image's color with the previous colors
                 r[i] = (r[i] * imageCount + ((double)bitmap[(i * 4) + 0] / 255.0)) / (double)(imageCount + 1);
                 g[i] = (g[i] * imageCount + ((double)bitmap[(i * 4) + 1] / 255.0)) / (double)(imageCount + 1);
                 b[i] = (b[i] * imageCount + ((double)bitmap[(i * 4) + 2] / 255.0)) / (double)(imageCount + 1);
@@ -145,17 +152,16 @@ or implied, of Nate Stedman.
         
         imageCount++;
         
-        NSData* save = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
-        [image release];
-        
-        NSString* str = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
-        
-        [save writeToURL:[folder URLByAppendingPathComponent:str] atomically:YES];
+        saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
+        outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
+        [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
         
         [lock lock];
         [progressBar setIntValue:i + 1];
-        [imageView setImage:[[NSImage alloc] initWithData:save]];
+        [imageView setImage:[[NSImage alloc] initWithData:saveData]];
         [lock unlock];
+        
+        [image release];
     }
     
     free(r);
