@@ -70,7 +70,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                          else {
                              [threadData setObject:@"last" forKey:@"buildStyle"];
                          }
-
                          
                          if (!testImage) {
                              if (![QTMovie canInitWithURL:url]) {
@@ -148,16 +147,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         [progressBar setIntValue:frame];
         [lock unlock];
         
-        if (!isVideo) {
-            NSLog(@"%@", [files objectAtIndex:frame]);
-        }
-        
         // load the frame, either from the video or from the file
         if (isVideo) {
             NSImage * img = [movie frameImageAtTime:QTMakeTime(frame, [movie duration].timeScale)];
             image = [[NSBitmapImageRep alloc] initWithData:[img TIFFRepresentation]];
         }
         else {
+            NSLog(@"%@", [files objectAtIndex:frame]);
             NSData* data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:frame]]];
             image = [[NSBitmapImageRep alloc] initWithData:data];
             [data release];
@@ -186,19 +182,22 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             
             accumulator = (long long*)calloc(size * 4, sizeof(long long));
             
-            #pragma omp parallel for shared(bitmap, accumulator)
-            for (int i = 0; i < size * 4; i++) {
-                accumulator[i] = bitmap[i];
-            }
+            dispatch_apply(imageHeight, dispatchQueue, ^(size_t y){
+                for (size_t i = y; i < y + (imageWidth * 4); i++) {
+                    accumulator[i] = bitmap[i];
+                }
+            });
             
             started = YES;
         }
         else { // otherwise, average the images
             #pragma omp parallel for shared(bitmap, accumulator)
-            for (int i = 0; i < size * 4; i++) {
-                // average this image's color with the previous colors
-                bitmap[i] = accumulator[i] = (accumulator[i] * imageCount + bitmap[i]) / (imageCount + 1);
-            }
+            dispatch_apply(imageHeight, dispatchQueue, ^(size_t y){
+                for (size_t i = y; i < y + (imageWidth * 4); i++) {
+                    // average this image's color with the previous colors
+                    bitmap[i] = accumulator[i] = (accumulator[i] * imageCount + bitmap[i]) / (imageCount + 1);
+                }
+            });
         }
         
         imageCount++;
