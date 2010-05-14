@@ -63,6 +63,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                          [threadData setObject:files forKey:@"files"];
                          [threadData setObject:[[open URLs] lastObject] forKey:@"outputURL"];
                          
+                         if([buildStyle selectedSegment] == 0)
+                         {
+                             [threadData setObject:@"all" forKey:@"buildStyle"];
+                         }
+                         else {
+                             [threadData setObject:@"last" forKey:@"buildStyle"];
+                         }
+
+                         
                          if (!testImage) {
                              if (![QTMovie canInitWithURL:url]) {
                                  NSLog(@"Unknown file type. Must be image or video.");
@@ -98,11 +107,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     int imageCount = 0, totalFrameCount = 0;
     int imageWidth, imageHeight;
     QTMovie* movie;
+    NSBitmapImageRep* lastImage = nil;
     
     // extract data from the dictionary
     NSArray* files = [threadData objectForKey:@"files"];
     NSURL* folder = [threadData objectForKey:@"outputURL"];
     BOOL isVideo = [[threadData objectForKey:@"type"] isEqualToString:@"video"];
+    BOOL buildAll = [[threadData objectForKey:@"buildStyle"] isEqualToString:@"all"];
     
     dispatch_queue_t dispatchQueue = dispatch_get_global_queue(0, 0);
     dispatch_group_t dispatchGroup = dispatch_group_create();
@@ -179,6 +190,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             for (int i = 0; i < size * 4; i++) {
                 accumulator[i] = bitmap[i];
             }
+            
             started = YES;
         }
         else { // otherwise, average the images
@@ -191,20 +203,40 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         
         imageCount++;
         
-        dispatch_group_async(dispatchGroup, dispatchQueue, ^{
-            NSData* saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
-            NSString* outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
-            [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
-            [image release];
+        if (buildAll) {
+            dispatch_group_async(dispatchGroup, dispatchQueue, ^{
+                NSData* saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
+                NSString* outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
+                [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
+                [image release];
+                
+                // TODO: I think that the displayed picture might be wrong at some point
+                // because we're doing this asynchronously. Do we care?
+                [lock lock];
+                [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
+                [lock unlock];
+            });
+        }
+        else {
+            if (lastImage) {
+                [lastImage release];
+            }
             
-            // TODO: I think that the displayed picture might be wrong at some point
-            // because we're doing this asynchronously. Do we care?
-            [lock lock];
-            [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
-            [lock unlock];
-        });
+            lastImage = image;
+        }
+
     }
     
+    if (lastImage) {
+        // Build and output the last frame
+        if (!buildAll) {
+            NSData* saveData = [lastImage representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
+            [saveData writeToURL:[folder URLByAppendingPathComponent:@"Average Lapse Final Frame"] atomically:YES];
+        }
+        
+        [lastImage release];
+    }
+        
     if (accumulator) {
         free(accumulator);
     }
