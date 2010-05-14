@@ -62,7 +62,7 @@ or implied, of Nate Stedman.
                          
                          NSURL* url = [NSURL URLWithString:[files objectAtIndex:0]];
                          NSImage* testImage = [[NSImage alloc] initWithContentsOfURL:url];
-                         NSMutableDictionary* threadData = [[NSMutableDictionary alloc] init];
+                         NSMutableDictionary* threadData = [[[NSMutableDictionary alloc] init] autorelease];
                          
                          [threadData setObject:files forKey:@"files"];
                          [threadData setObject:[[open URLs] lastObject] forKey:@"outputURL"];
@@ -215,7 +215,7 @@ or implied, of Nate Stedman.
         
         [lock lock];
         [progressBar setIntValue:i + 1];
-        [imageView setImage:[[NSImage alloc] initWithData:saveData]];
+        [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
         [lock unlock];
         
         [image release];
@@ -233,6 +233,10 @@ or implied, of Nate Stedman.
     
     [lock release];
     [release release];
+    
+    if (isVideo) {
+        [movie release];
+    }
 }
 
 @end
