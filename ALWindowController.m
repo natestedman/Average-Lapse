@@ -96,7 +96,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     NSLock* lock = [[NSLock alloc] init];
     BOOL started = NO;
     int size;
-    long long *r = nil, *g = nil, *b = nil;
+    long long *accumulator = nil;
     int imageCount = 0, totalFrameCount = 0;
     int imageWidth, imageHeight;
     
@@ -177,30 +177,19 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             imageHeight = [image pixelsHigh];
             size = imageWidth * imageHeight;
             
-            r = (long long*)malloc(sizeof(long long) * size);
-            g = (long long*)malloc(sizeof(long long) * size);
-            b = (long long*)malloc(sizeof(long long) * size);
+            accumulator = (long long*)calloc(size * 4, sizeof(long long));
             
             #pragma omp parallel for shared(r, g, b, bitmap)
-            for (int i = 0; i < size; i++) {
-                r[i] = bitmap[(i * 4) + 0];
-                g[i] = bitmap[(i * 4) + 1];
-                b[i] = bitmap[(i * 4) + 2];
+            for (int i = 0; i < size * 4; i++) {
+                accumulator[i] = bitmap[i];
             }
             started = YES;
         }
         else { // otherwise, average the images
             #pragma omp parallel for shared(r, g, b, bitmap)
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size * 4; i++) {
                 // average this image's color with the previous colors
-                r[i] = (r[i] * imageCount + bitmap[(i * 4) + 0]) / (imageCount + 1);
-                g[i] = (g[i] * imageCount + bitmap[(i * 4) + 1]) / (imageCount + 1);
-                b[i] = (b[i] * imageCount + bitmap[(i * 4) + 2]) / (imageCount + 1);
-                
-                // write the color back to the image, as we're done with this pixel
-                bitmap[(i * 4) + 0] = r[i];
-                bitmap[(i * 4) + 1] = g[i];
-                bitmap[(i * 4) + 2] = b[i];
+                bitmap[i] = accumulator[i] = (accumulator[i] * imageCount + bitmap[i]) / (imageCount + 1);
             }
         }
         
@@ -219,14 +208,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         });
     }
     
-    if (r != nil) {
-        free(r);
-    }
-    if (g != nil) {
-        free(g);
-    }
-    if (b != nil) {
-        free(b);
+    if (accumulator) {
+        free(accumulator);
     }
     
     [lock release];
