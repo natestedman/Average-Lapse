@@ -104,7 +104,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     NSURL* folder = [threadData objectForKey:@"outputURL"];
     BOOL isVideo = [[threadData objectForKey:@"type"] isEqualToString:@"video"];
     
-    dispatch_queue_t q_default = dispatch_get_global_queue(0, 0);
+    dispatch_queue_t dispatchQueue = dispatch_get_global_queue(0, 0);
+    dispatch_group_t dispatchGroup = dispatch_group_create();
     
     if (isVideo) {
         // load the video
@@ -190,7 +191,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         
         imageCount++;
         
-        dispatch_async(q_default, ^{
+        dispatch_group_async(dispatchGroup, dispatchQueue, ^{
             NSData* saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
             NSString* outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
             [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
@@ -212,8 +213,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         [movie release];
     }
     
+    dispatch_group_wait(dispatchGroup, DISPATCH_TIME_FOREVER);
+    
     [lock lock];
-    [progressBar setIntValue:[progressBar maxValue]];
+    [imageView setImage:nil];
+    [progressBar setIntValue:0];
+    [mainView setSubviews:[NSArray arrayWithObject:dropView]];
     [lock unlock];
     
     [lock release];
