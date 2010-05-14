@@ -87,6 +87,7 @@ or implied, of Nate Stedman.
     int size;
     double *r, *g, *b;
     int imageCount = 0;
+    int imageWidth, imageHeight;
     
     // extract data from the array
     NSArray* files = [array objectAtIndex:0];
@@ -111,6 +112,17 @@ or implied, of Nate Stedman.
         [data release];
         
         if (image == nil) {
+            NSLog(@"Skipped (couldn't load image).");
+            [lock lock];
+            [progressBar setIntValue:i + 1];
+            [lock unlock];
+            continue;
+        }
+        
+        if (started &&
+            (imageWidth != [image pixelsWide] ||
+             imageHeight != [image pixelsHigh])) {
+            NSLog(@"Skipped (size doesn't match).");
             [lock lock];
             [progressBar setIntValue:i + 1];
             [lock unlock];
@@ -121,7 +133,10 @@ or implied, of Nate Stedman.
         
         // if this is the first image, initialize the arrays
         if (!started) {
-            size = [image pixelsHigh] * [image pixelsWide];
+            imageWidth = [image pixelsWide];
+            imageHeight = [image pixelsHigh];
+            size = imageWidth * imageHeight;
+            
             r = (double*)malloc(sizeof(double) * size);
             g = (double*)malloc(sizeof(double) * size);
             b = (double*)malloc(sizeof(double) * size);
