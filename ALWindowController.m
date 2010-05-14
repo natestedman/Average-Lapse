@@ -183,7 +183,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             accumulator = (long long*)calloc(size * 4, sizeof(long long));
             
             dispatch_apply(imageHeight, dispatchQueue, ^(size_t y){
-                for (size_t i = y; i < y + (imageWidth * 4); i++) {
+                for (size_t i = (y * imageWidth * 4); i < (y * imageWidth * 4) + (imageWidth * 4); i++) {
                     accumulator[i] = bitmap[i];
                 }
             });
@@ -192,7 +192,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         }
         else { // otherwise, average the images
             dispatch_apply(imageHeight, dispatchQueue, ^(size_t y){
-                for (size_t i = y; i < y + (imageWidth * 4); i++) {
+                for (size_t i = (y * imageWidth * 4); i < (y * imageWidth * 4) + (imageWidth * 4); i++) {
                     // average this image's color with the previous colors
                     bitmap[i] = accumulator[i] = (accumulator[i] * imageCount + bitmap[i]) / (imageCount + 1);
                 }
