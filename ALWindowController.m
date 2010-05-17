@@ -26,7 +26,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #import "ALWindowController.h"
 
 #define JPEG_KEYS [NSArray arrayWithObjects:NSImageCompressionFactor, nil]
-#define JPEG_OBJECTS [NSArray arrayWithObjects:[NSNumber numberWithFloat:1.0f], nil]
+#define JPEG_OBJECTS [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.9f], nil]
 #define JPEG_PROPERTIES [NSDictionary dictionaryWithObjects:JPEG_OBJECTS forKeys:JPEG_KEYS]
 
 @implementation ALWindowController
@@ -153,7 +153,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             image = [[NSBitmapImageRep alloc] initWithData:[img TIFFRepresentation]];
         }
         else {
-            NSLog(@"%@", [files objectAtIndex:frame]);
             NSData* data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:frame]]];
             image = [[NSBitmapImageRep alloc] initWithData:data];
             [data release];
@@ -200,7 +199,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         imageCount++;
         
         if (buildAll) {
-            dispatch_group_async(dispatchGroup, dispatchQueue, ^{
+            //dispatch_group_async(dispatchGroup, dispatchQueue, ^{
                 NSData* saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
                 NSString* outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
                 [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
@@ -211,7 +210,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 [lock lock];
                 [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
                 [lock unlock];
-            });
+            //});
         }
         else {
             if (lastImage) {
@@ -248,6 +247,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [progressBar setIntValue:0];
     [mainView setSubviews:[NSArray arrayWithObject:dropView]];
     [lock unlock];
+    
+    NSSound* sound = [NSSound soundNamed:@"Glass"];
+    [sound play];
     
     [lock release];
     [release release];
