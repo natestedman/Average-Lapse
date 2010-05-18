@@ -21,9 +21,9 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="29"/>
+			<integer value="533"/>
 			<integer value="558"/>
-			<integer value="371"/>
+			<integer value="29"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1142,10 +1142,17 @@
 				<int key="NSvFlags">274</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
+					<object class="NSCustomView" id="1039635580">
+						<reference key="NSNextResponder" ref="522616845"/>
+						<int key="NSvFlags">290</int>
+						<string key="NSFrame">{{20, 8}, {367, 22}}</string>
+						<reference key="NSSuperview" ref="522616845"/>
+						<string key="NSClassName">ALProgressBar</string>
+					</object>
 					<object class="NSButton" id="542738973">
 						<reference key="NSNextResponder" ref="522616845"/>
 						<int key="NSvFlags">289</int>
-						<string key="NSFrame">{{397, 6}, {28, 25}}</string>
+						<string key="NSFrame">{{395, 6}, {28, 25}}</string>
 						<reference key="NSSuperview" ref="522616845"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSButtonCell" key="NSCell" id="368921198">
@@ -1165,15 +1172,6 @@
 							<int key="NSPeriodicDelay">400</int>
 							<int key="NSPeriodicInterval">75</int>
 						</object>
-					</object>
-					<object class="NSProgressIndicator" id="227751158">
-						<reference key="NSNextResponder" ref="522616845"/>
-						<int key="NSvFlags">1314</int>
-						<object class="NSPSMatrix" key="NSDrawMatrix"/>
-						<string key="NSFrame">{{18, 10}, {373, 20}}</string>
-						<reference key="NSSuperview" ref="522616845"/>
-						<int key="NSpiFlags">16392</int>
-						<double key="NSMaxValue">100</double>
 					</object>
 					<object class="NSImageView" id="596412902">
 						<reference key="NSNextResponder" ref="522616845"/>
@@ -1717,20 +1715,20 @@
 					<int key="connectionID">574</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBOutletConnection" key="connection">
-						<string key="label">progressBar</string>
-						<reference key="source" ref="48030253"/>
-						<reference key="destination" ref="227751158"/>
-					</object>
-					<int key="connectionID">575</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
 						<string key="label">cancelAction:</string>
 						<reference key="source" ref="48030253"/>
 						<reference key="destination" ref="542738973"/>
 					</object>
 					<int key="connectionID">588</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">progressBar</string>
+						<reference key="source" ref="48030253"/>
+						<reference key="destination" ref="1039635580"/>
+					</object>
+					<int key="connectionID">590</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -2546,7 +2544,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="596412902"/>
 							<reference ref="542738973"/>
-							<reference ref="227751158"/>
+							<reference ref="1039635580"/>
 						</object>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">Progress View</string>
@@ -2580,11 +2578,6 @@
 						<reference key="parent" ref="763800700"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">572</int>
-						<reference key="object" ref="227751158"/>
-						<reference key="parent" ref="522616845"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">586</int>
 						<reference key="object" ref="542738973"/>
 						<object class="NSMutableArray" key="children">
@@ -2597,6 +2590,11 @@
 						<int key="objectID">587</int>
 						<reference key="object" ref="368921198"/>
 						<reference key="parent" ref="542738973"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">589</int>
+						<reference key="object" ref="1039635580"/>
+						<reference key="parent" ref="522616845"/>
 					</object>
 				</object>
 			</object>
@@ -2757,12 +2755,11 @@
 					<string>57.editorWindowContentRectSynchronizationRect</string>
 					<string>570.IBPluginDependency</string>
 					<string>571.IBPluginDependency</string>
-					<string>572.CustomClassName</string>
-					<string>572.IBPluginDependency</string>
 					<string>58.IBPluginDependency</string>
 					<string>58.ImportedFromIB2</string>
 					<string>586.IBPluginDependency</string>
 					<string>587.IBPluginDependency</string>
+					<string>589.IBPluginDependency</string>
 					<string>72.IBPluginDependency</string>
 					<string>72.ImportedFromIB2</string>
 					<string>73.IBPluginDependency</string>
@@ -2933,7 +2930,7 @@
 					<integer value="0"/>
 					<string>com.brandonwalkin.BWToolkit</string>
 					<string>com.brandonwalkin.BWToolkit</string>
-					<string>{{777, 562}, {443, 323}}</string>
+					<string>{{598, 480}, {443, 323}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<integer value="1"/>
@@ -2945,10 +2942,9 @@
 					<string>{{23, 794}, {245, 183}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>ALProgressBar</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<integer value="1"/>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
@@ -2995,7 +2991,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">588</int>
+			<int key="maxID">590</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

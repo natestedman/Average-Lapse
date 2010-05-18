@@ -39,32 +39,37 @@
     
     NSGradient* grad;
     NSGradient* progressGrad;
-    if( [[self window] isKeyWindow]) {
-        grad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.204 alpha:1]
-                                             endingColor:[NSColor colorWithCalibratedWhite:0.463 alpha:1]];
+    if ([[self window] isKeyWindow]) {
+        grad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.204 alpha:1]
+                                             endingColor:[NSColor colorWithDeviceWhite:0.463 alpha:1]];
         
-        progressGrad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.996 alpha:1]
-                                                     endingColor:[NSColor colorWithCalibratedWhite:0.722 alpha:1]];
+        progressGrad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.996 alpha:1]
+                                                     endingColor:[NSColor colorWithDeviceWhite:0.722 alpha:1]];
         
-        [[NSColor colorWithCalibratedWhite:0.306 alpha:1] set];
+        [[NSColor colorWithDeviceWhite:0.306 alpha:1] set];
     }
     else {
-        grad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.996 alpha:1]
-                                             endingColor:[NSColor colorWithCalibratedWhite:0.663 alpha:1]];
+        grad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.996 alpha:1]
+                                             endingColor:[NSColor colorWithDeviceWhite:0.663 alpha:1]];
         
-        progressGrad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.204 alpha:1]
-                                                     endingColor:[NSColor colorWithCalibratedWhite:0.463 alpha:1]];
+        progressGrad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.204 alpha:1]
+                                                     endingColor:[NSColor colorWithDeviceWhite:0.463 alpha:1]];
         
-        [[NSColor colorWithCalibratedWhite:0.663 alpha:1] set];
+        [[NSColor colorWithDeviceWhite:0.663 alpha:1] set];
     }    
     
     [grad drawInBezierPath:path angle:90];
-    [progressGrad drawInBezierPath:progressPath angle:90];
+    
+    if (progressRect.size.width > 0.0) {
+        [progressGrad drawInBezierPath:progressPath angle:90];
+    }
     
     [[NSGraphicsContext currentContext] saveGraphicsState];
 	[[NSGraphicsContext currentContext] setShouldAntialias: NO];
     
-    [path stroke];
+    if ([[self window] isKeyWindow]) {
+        [path stroke];
+    }
     
     [[NSGraphicsContext currentContext] restoreGraphicsState];
     

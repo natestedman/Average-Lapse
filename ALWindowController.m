@@ -57,6 +57,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                  completionHandler:^(NSInteger result) {
                      if (result == NSFileHandlingPanelOKButton) {
                          [progressBar setDoubleValue:0];
+                         [progressBar displayIfNeeded];
                          
                          NSURL* url = [NSURL URLWithString:[files objectAtIndex:0]];
                          NSImage* testImage = [[NSImage alloc] initWithContentsOfURL:url];
@@ -177,6 +178,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         
         [lock lock];
         [progressBar setDoubleValue:frame];
+        [progressBar displayIfNeeded];
         [lock unlock];
         
         // load the frame, either from the video or from the file
