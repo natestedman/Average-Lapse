@@ -159,7 +159,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         NSBitmapImageRep* image;
         
         [lock lock];
-        [progressBar setIntValue:frame];
+        [progressBar setDoubleValue:frame];
         [lock unlock];
         
         // load the frame, either from the video or from the file

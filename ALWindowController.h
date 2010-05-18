@@ -29,7 +29,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     IBOutlet NSView* mainView;
     IBOutlet NSView* dropView;
     IBOutlet NSView* progressView;
-    IBOutlet NSLevelIndicator* progressBar;
+    IBOutlet NSProgressIndicator* progressBar;
     IBOutlet NSImageView* imageView;
     IBOutlet NSSegmentedControl* buildStyle;
     
