@@ -310,7 +310,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                    iconData:nil
                                    priority:0
                                    isSticky:NO
-                               clickContext:nil];
+                               clickContext:[folder path]];
     
     [lock unlock];
     

@@ -35,9 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma mark -
 #pragma mark Growl Delegate Implementation
 - (void)growlNotificationWasClicked:(id)clickContext {
-    if (clickContext) {
-        [clickContext release];
-    }
+    [[NSWorkspace sharedWorkspace] openFile:clickContext];
 }
 
 
