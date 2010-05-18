@@ -164,7 +164,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         
         // load the frame, either from the video or from the file
         if (isVideo) {
-            NSImage * img = [movie frameImageAtTime:movieCurrentTime withAttributes:movieAttributes error:nil];
+            NSImage* img = [movie frameImageAtTime:movieCurrentTime withAttributes:movieAttributes error:nil];
             image = [[NSBitmapImageRep alloc] initWithData:[img TIFFRepresentation]];
             movieCurrentTime.timeValue += movieStepTime.timeValue;
         }
