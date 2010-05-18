@@ -56,8 +56,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                  completionHandler:^(NSInteger result) {
                      if (result == NSFileHandlingPanelOKButton) {
                          [progressBar setDoubleValue:0];
-                         [progressView setFrame:[mainView frame]];
-                         [mainView setSubviews:[NSArray arrayWithObject:progressView]];
                          
                          NSURL* url = [NSURL URLWithString:[files objectAtIndex:0]];
                          NSImage* testImage = [[NSImage alloc] initWithContentsOfURL:url];
@@ -76,7 +74,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                          
                          if (!testImage) {
                              if (![QTMovie canInitWithURL:url]) {
-                                 NSLog(@"Unknown file type. Must be image or video.");
+                                 NSAlert *error = [[[NSAlert alloc] init] autorelease];
+                                 [error addButtonWithTitle:@"OK"];
+                                 [error setMessageText:@"Unknown file type."];
+                                 [error setInformativeText:@"Must be image or video."];
+                                 [error setAlertStyle:NSWarningAlertStyle];
+                                 [error runModal];
+                                 
+                                 return;
                              }
                              
                              NSLog(@"Rendering a movie");
@@ -94,6 +99,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                              [self performSelectorInBackground:@selector(thread:)
                                                     withObject:threadData];
                          }
+                         
+                         [progressView setFrame:[mainView frame]];
+                         [mainView setSubviews:[NSArray arrayWithObject:progressView]];
 
                      }
                  }];
