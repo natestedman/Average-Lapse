@@ -28,6 +28,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define JPEG_KEYS [NSArray arrayWithObjects:NSImageCompressionFactor, nil]
 #define JPEG_OBJECTS [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.9f], nil]
 #define JPEG_PROPERTIES [NSDictionary dictionaryWithObjects:JPEG_OBJECTS forKeys:JPEG_KEYS]
+#define DISPLAY_WIDTH 800
 
 @implementation ALWindowController
 
@@ -180,6 +181,32 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             imageHeight = [image pixelsHigh];
             size = imageWidth * imageHeight;
             
+            // animate the size of the window
+            [lock lock];
+            
+            NSRect rect = [[self window] frame];
+            
+            // save the origin size so that it can be restoed
+            originalSize = rect;
+            
+            float width = DISPLAY_WIDTH;
+            float height = width * ((float)imageHeight / imageWidth) +
+                           rect.size.height - [imageView frame].size.height;
+            
+            if (height < [[self window] minSize].height) {
+                width *= [[self window] minSize].height / height;
+                height *= [[self window] minSize].height / height;
+            }
+            
+            rect.origin.x += (rect.size.width - DISPLAY_WIDTH) / 2;
+            rect.origin.y += (rect.size.height - height) / 2;
+            rect.size.width = DISPLAY_WIDTH;
+            rect.size.height = height;
+            
+            [[self window] setFrame:rect display:YES animate:YES];
+            
+            [lock unlock];
+            
             accumulator = (unsigned char*)calloc(size * 4, sizeof(unsigned char));
             
             memcpy(accumulator, bitmap, size * 4);
@@ -249,6 +276,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [progressBar setIntValue:0];
     [dropView setFrame:[mainView frame]];
     [mainView setSubviews:[NSArray arrayWithObject:dropView]];
+    
+    // restore the original size, but zoom down to the center of the window
+    NSRect rect = [[self window] frame];
+    rect.origin.x += (rect.size.width - originalSize.size.width) / 2;
+    rect.origin.y += (rect.size.height - originalSize.size.height) / 2;
+    rect.size.width = originalSize.size.width;
+    rect.size.height = originalSize.size.height;
+    
+    [[self window] setFrame:rect display:YES animate:YES];
     [lock unlock];
     
     NSSound* sound = [NSSound soundNamed:@"Glass"];

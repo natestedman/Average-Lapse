@@ -32,6 +32,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     IBOutlet NSLevelIndicator* progressBar;
     IBOutlet NSImageView* imageView;
     IBOutlet NSSegmentedControl* buildStyle;
+    
+    NSRect originalSize;
 }
 
 -(void)generate:(NSArray*)files;
