@@ -101,7 +101,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -(void)thread:(NSDictionary*)threadData {
     NSAutoreleasePool* release = [[NSAutoreleasePool alloc] init];
-    NSLock* lock = [[NSLock alloc] init];
+    NSLock* lock = [[NSRecursiveLock alloc] init];
     BOOL started = NO;
     long long size;
     unsigned char* accumulator = nil;
