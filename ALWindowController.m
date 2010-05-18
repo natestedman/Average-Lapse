@@ -113,6 +113,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     NSAutoreleasePool* release = [[NSAutoreleasePool alloc] init];
     NSLock* lock = [[NSRecursiveLock alloc] init];
     BOOL started = NO;
+    cancel = NO;
     long long size;
     unsigned char* accumulator = nil;
     long long imageCount = 0, totalFrameCount = 0;
@@ -164,6 +165,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [movieAttributes setObject:QTMovieFrameImageTypeNSImage forKey:QTMovieFrameImageType];
     
     for (long long frame = 0; frame < totalFrameCount; frame++) {
+        [lock lock];
+        if (cancel) {
+            break;
+        }
+        [lock unlock];
+        
         NSAutoreleasePool* innerReleasePool = [[NSAutoreleasePool alloc] init];
         unsigned char* bitmap;
         NSBitmapImageRep* image;
@@ -295,7 +302,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         [movie release];
     }
     
-    dispatch_group_wait(dispatchGroup, DISPATCH_TIME_FOREVER);
+    [lock lock];
+    if (!cancel) {
+        [lock unlock];
+        dispatch_group_wait(dispatchGroup, DISPATCH_TIME_FOREVER);
+    }
+    else {
+        [lock unlock];
+    }
+
     
     [lock lock];
     [imageView setImage:nil];
@@ -303,20 +318,21 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [mainView setSubviews:[NSArray arrayWithObject:dropView]];
     [self performSelectorOnMainThread:@selector(restoreWindow) withObject:nil waitUntilDone:NO];
     
-    // post a Growl notification
-    [GrowlApplicationBridge notifyWithTitle:@"Rendering Complete"
-                                description:[folder path]
-                           notificationName:@"Rendering Complete"
-                                   iconData:nil
-                                   priority:0
-                                   isSticky:NO
-                               clickContext:[folder path]];
+    if (!cancel) {
+        NSSound* sound = [NSSound soundNamed:@"Glass"];
+        [sound play];
+        
+        // post a Growl notification
+        [GrowlApplicationBridge notifyWithTitle:@"Rendering Complete"
+                                    description:[folder path]
+                               notificationName:@"Rendering Complete"
+                                       iconData:nil
+                                       priority:0
+                                       isSticky:NO
+                                   clickContext:nil];
+    }
     
     [lock unlock];
-    
-    NSSound* sound = [NSSound soundNamed:@"Glass"];
-    [sound play];
-    
     [lock release];
     [release release];
 }
@@ -326,7 +342,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
 -(void)restoreWindow {
-    // restore the original size, but zoom down to the center of the window
+    // restore the original size, but zoom down to the center of the window    
     NSRect rect = [[self window] frame];
     rect.origin.x += (rect.size.width - originalSize.size.width) / 2;
     rect.origin.y += (rect.size.height - originalSize.size.height) / 2;
@@ -334,6 +350,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     rect.size.height = originalSize.size.height;
     
     [[self window] setFrame:rect display:YES animate:YES];
+}
+
+-(IBAction)cancelAction:(id)sender {
+    cancel = YES;
 }
 
 @end

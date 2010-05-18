@@ -35,6 +35,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     
     NSRect originalSize;
     NSRect targetSize;
+    
+    BOOL cancel;
 }
 
 -(void)generate:(NSArray*)files;
@@ -42,5 +44,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -(void)enlargeWindow;
 -(void)restoreWindow;
+
+-(IBAction)cancelAction:(id)sender;
 
 @end
