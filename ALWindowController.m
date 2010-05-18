@@ -200,7 +200,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         imageCount++;
         
         if (buildAll) {
-            //dispatch_group_async(dispatchGroup, dispatchQueue, ^{
+            dispatch_group_async(dispatchGroup, dispatchQueue, ^{
                 NSData* saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
                 NSString* outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
                 [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
@@ -211,7 +211,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 [lock lock];
                 [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
                 [lock unlock];
-            //});
+            });
         }
         else {
             if (lastImage) {
