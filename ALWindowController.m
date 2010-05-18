@@ -103,12 +103,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     NSAutoreleasePool* release = [[NSAutoreleasePool alloc] init];
     NSLock* lock = [[NSLock alloc] init];
     BOOL started = NO;
-    int size;
+    long long size;
     unsigned char* accumulator = nil;
-    int imageCount = 0, totalFrameCount = 0;
+    long long imageCount = 0, totalFrameCount = 0;
     int imageWidth, imageHeight;
     QTMovie* movie;
+    QTTime movieEndTime, movieCurrentTime, movieStepTime;
     NSBitmapImageRep* lastImage = nil;
+    NSMutableDictionary* movieAttributes;
     
     // extract data from the dictionary
     NSArray* files = [threadData objectForKey:@"files"];
@@ -123,6 +125,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         // load the video
         [QTMovie enterQTKitOnThread];
         movie = [[QTMovie alloc] initWithFile:[[NSURL URLWithString:[files lastObject]] path] error:nil];
+        [movie setAttribute:[NSNumber numberWithBool:NO] forKey:QTMovieLoopsAttribute];
+        movieEndTime = [movie duration];
+        [movie gotoBeginning];
+        movieCurrentTime = [movie currentTime];
+        [movie stepForward];
+        movieStepTime = [movie currentTime];
+        [movie gotoBeginning];
         
         if (movie == nil) {
             NSLog(@"Failed to load video.");
@@ -131,7 +140,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             return;
         }
         
-        totalFrameCount = [movie duration].timeValue;
+        totalFrameCount = movieEndTime.timeValue / movieStepTime.timeValue;
     }
     else {
         totalFrameCount = [files count];
@@ -141,7 +150,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [progressBar setMaxValue:totalFrameCount];
     [lock unlock];
     
-    for (int frame = 0; frame < totalFrameCount; frame++) {
+    movieAttributes = [NSMutableDictionary dictionary];
+    [movieAttributes setObject:QTMovieFrameImageTypeNSImage forKey:QTMovieFrameImageType];
+    
+    for (long long frame = 0; frame < totalFrameCount; frame++) {
         NSAutoreleasePool* innerReleasePool = [[NSAutoreleasePool alloc] init];
         unsigned char* bitmap;
         NSBitmapImageRep* image;
@@ -152,8 +164,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         
         // load the frame, either from the video or from the file
         if (isVideo) {
-            NSImage * img = [movie frameImageAtTime:QTMakeTime(frame, [movie duration].timeScale)];
+            NSImage * img = [movie frameImageAtTime:movieCurrentTime withAttributes:movieAttributes error:nil];
             image = [[NSBitmapImageRep alloc] initWithData:[img TIFFRepresentation]];
+            movieCurrentTime.timeValue += movieStepTime.timeValue;
         }
         else {
             NSData* data = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[files objectAtIndex:frame]]];
