@@ -19,26 +19,40 @@
     return self;
 }
 
+-(void)setDoubleValue:(double)doubleValue {
+    [super setDoubleValue:doubleValue];
+    [self setNeedsDisplay:YES];
+}
+
 - (void)drawRect:(NSRect)dirtyRect {
     
     NSRect rect = [self bounds];
-    //rect.size.height--;
+    rect.size.height--;
     
-    NSRect progressRect = rect;
-    progressRect.size.width *= (float)([self doubleValue] / [self maxValue]);
-    progressRect.size.height -= 2;
-    progressRect.origin.y += 1;
-    
-    NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:rect
+    NSBezierPath* borderPath = [NSBezierPath bezierPathWithRoundedRect:rect
                                                          xRadius:4
                                                          yRadius:4];
+    rect.origin.y--;
+    NSBezierPath* lightPath = [NSBezierPath bezierPathWithRoundedRect:rect
+                                                              xRadius:4
+                                                              yRadius:4];
+    rect.origin.y++;
     
-    NSBezierPath* progressPath = [NSBezierPath bezierPathWithRoundedRect:progressRect
-                                                                 xRadius:4
-                                                                 yRadius:4];
+    rect = NSInsetRect(rect, 1, 1);
+    
+    NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:rect
+                                                         xRadius:2
+                                                         yRadius:2];
+    rect.size.width *= (float)([self doubleValue] / [self maxValue]);
+    
+    NSBezierPath* progressPath = [NSBezierPath bezierPathWithRoundedRect:rect
+                                                                 xRadius:2
+                                                                 yRadius:2];
     
     NSGradient* grad;
     NSGradient* progressGrad;
+    NSColor* fillColor;
+    
     if ([[self window] isKeyWindow]) {
         grad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.204 alpha:1]
                                              endingColor:[NSColor colorWithDeviceWhite:0.463 alpha:1]];
@@ -46,32 +60,39 @@
         progressGrad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.996 alpha:1]
                                                      endingColor:[NSColor colorWithDeviceWhite:0.722 alpha:1]];
         
-        [[NSColor colorWithDeviceWhite:0.306 alpha:1] set];
+        [[NSColor colorWithDeviceWhite:0.729 alpha:1] set];
+        fillColor = [NSColor colorWithDeviceWhite:0.306 alpha:1];
     }
     else {
-        grad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.996 alpha:1]
-                                             endingColor:[NSColor colorWithDeviceWhite:0.663 alpha:1]];
+        grad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.357 alpha:1]
+                                             endingColor:[NSColor colorWithDeviceWhite:0.624 alpha:1]];
         
-        progressGrad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.204 alpha:1]
-                                                     endingColor:[NSColor colorWithDeviceWhite:0.463 alpha:1]];
+        progressGrad = [[NSGradient alloc] initWithStartingColor:[NSColor colorWithDeviceWhite:0.996 alpha:1]
+                                                     endingColor:[NSColor colorWithDeviceWhite:0.820 alpha:1]];
         
-        [[NSColor colorWithDeviceWhite:0.663 alpha:1] set];
-    }    
-    
-    [grad drawInBezierPath:path angle:90];
-    
-    if (progressRect.size.width > 0.0) {
-        [progressGrad drawInBezierPath:progressPath angle:90];
+        [[NSColor colorWithDeviceWhite:0.882 alpha:1] set];
+        fillColor = [NSColor colorWithDeviceWhite:0.663 alpha:1];
     }
     
     [[NSGraphicsContext currentContext] saveGraphicsState];
 	[[NSGraphicsContext currentContext] setShouldAntialias: NO];
     
-    if ([[self window] isKeyWindow]) {
-        [path stroke];
-    }
+    // draw the highlight
+    [lightPath stroke];
+    [lightPath fill];
+    
+    // draw the outline
+    [fillColor set];
+    [borderPath stroke];
+    [borderPath fill];
     
     [[NSGraphicsContext currentContext] restoreGraphicsState];
+    
+    [grad drawInBezierPath:path angle:90];
+    
+    if (rect.size.width > 0.0) {
+        [progressGrad drawInBezierPath:progressPath angle:90];
+    }
     
     [grad release];
     [progressGrad release];
