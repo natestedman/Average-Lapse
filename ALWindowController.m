@@ -247,6 +247,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [lock lock];
     [imageView setImage:nil];
     [progressBar setIntValue:0];
+    [dropView setFrame:[mainView frame]];
     [mainView setSubviews:[NSArray arrayWithObject:dropView]];
     [lock unlock];
     
