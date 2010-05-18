@@ -22,6 +22,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVE
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#import <math.h>
 #import <QTKit/QTKit.h>
 #import "ALWindowController.h"
 
@@ -189,7 +190,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             // save the origin size so that it can be restoed
             originalSize = rect;
             
-            float width = DISPLAY_WIDTH;
+            float width = fmin(DISPLAY_WIDTH, imageWidth);
             float height = width * ((float)imageHeight / imageWidth) +
                            rect.size.height - [imageView frame].size.height;
             
@@ -198,9 +199,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                 height *= [[self window] minSize].height / height;
             }
             
-            rect.origin.x += (rect.size.width - DISPLAY_WIDTH) / 2;
+            rect.origin.x += (rect.size.width - width) / 2;
             rect.origin.y += (rect.size.height - height) / 2;
-            rect.size.width = DISPLAY_WIDTH;
+            rect.size.width = width;
             rect.size.height = height;
             
             [[self window] setFrame:rect display:YES animate:YES];
