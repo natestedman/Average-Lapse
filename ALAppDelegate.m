@@ -29,7 +29,17 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @synthesize window;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-	// Insert code here to initialize your application 
+	[GrowlApplicationBridge setGrowlDelegate:self];
 }
+
+#pragma mark -
+#pragma mark Growl Delegate Implementation
+- (void)growlNotificationWasClicked:(id)clickContext {
+    if (clickContext) {
+        [clickContext release];
+    }
+}
+
+
 
 @end

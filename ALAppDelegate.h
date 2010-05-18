@@ -23,8 +23,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #import <Cocoa/Cocoa.h>
+#import <Growl/Growl.h>
 
-@interface ALAppDelegate : NSObject <NSApplicationDelegate> {
+@interface ALAppDelegate : NSObject <NSApplicationDelegate, GrowlApplicationBridgeDelegate> {
     NSWindow *window;
 }
 

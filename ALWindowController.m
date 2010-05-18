@@ -24,6 +24,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #import <math.h>
 #import <QTKit/QTKit.h>
+#import <Growl/Growl.h>
 #import "ALWindowController.h"
 
 #define JPEG_KEYS [NSArray arrayWithObjects:NSImageCompressionFactor, nil]
@@ -301,6 +302,16 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [dropView setFrame:[mainView frame]];
     [mainView setSubviews:[NSArray arrayWithObject:dropView]];
     [self performSelectorOnMainThread:@selector(restoreWindow) withObject:nil waitUntilDone:NO];
+    
+    // post a Growl notification
+    [GrowlApplicationBridge notifyWithTitle:@"Rendering Complete"
+                                description:[folder path]
+                           notificationName:@"Rendering Complete"
+                                   iconData:nil
+                                   priority:0
+                                   isSticky:NO
+                               clickContext:nil];
+    
     [lock unlock];
     
     NSSound* sound = [NSSound soundNamed:@"Glass"];

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   Growl Registration Ticket.growlRegDict
+   IDMP
+
+   Created by Nate Stedman on 3/14/10.
+   Copyright 2010 Nate Stedman. All rights reserved.
+-->
+<plist version="1.0">
+    <dict>
+        <key>TicketVersion</key>
+        <integer>1</integer>
+        
+        <key>AllNotifications</key>
+        <array>
+            <string>Rendering Complete</string>
+            <string>Couldn't Load</string>
+            <string>Wrong Size</string>
+        </array>
+        
+        <key>DefaultNotifications</key>
+        <array>
+            <string>Rendering Complete</string>
+            <string>Couldn't Load</string>
+            <string>Wrong Size</string>
+        </array>
+    </dict>
+</plist>
