@@ -217,7 +217,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             rect.size.width = width;
             rect.size.height = height;
             
-            [[self window] setFrame:rect display:YES animate:YES];
+            targetSize = rect;
+            
+            [self performSelectorOnMainThread:@selector(enlargeWindow) withObject:nil waitUntilDone:NO];
             
             [lock unlock];
             
@@ -290,7 +292,21 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [progressBar setIntValue:0];
     [dropView setFrame:[mainView frame]];
     [mainView setSubviews:[NSArray arrayWithObject:dropView]];
+    [self performSelectorOnMainThread:@selector(restoreWindow) withObject:nil waitUntilDone:NO];
+    [lock unlock];
     
+    NSSound* sound = [NSSound soundNamed:@"Glass"];
+    [sound play];
+    
+    [lock release];
+    [release release];
+}
+
+-(void)enlargeWindow {
+    [[self window] setFrame:targetSize display:YES animate:YES];
+}
+
+-(void)restoreWindow {
     // restore the original size, but zoom down to the center of the window
     NSRect rect = [[self window] frame];
     rect.origin.x += (rect.size.width - originalSize.size.width) / 2;
@@ -299,13 +315,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     rect.size.height = originalSize.size.height;
     
     [[self window] setFrame:rect display:YES animate:YES];
-    [lock unlock];
-    
-    NSSound* sound = [NSSound soundNamed:@"Glass"];
-    [sound play];
-    
-    [lock release];
-    [release release];
 }
 
 @end

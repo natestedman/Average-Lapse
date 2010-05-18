@@ -34,9 +34,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     IBOutlet NSSegmentedControl* buildStyle;
     
     NSRect originalSize;
+    NSRect targetSize;
 }
 
 -(void)generate:(NSArray*)files;
 -(void)thread:(NSDictionary*)threadData;
+
+-(void)enlargeWindow;
+-(void)restoreWindow;
 
 @end
