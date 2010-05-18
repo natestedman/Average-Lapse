@@ -55,6 +55,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [open beginSheetModalForWindow:[self window]
                  completionHandler:^(NSInteger result) {
                      if (result == NSFileHandlingPanelOKButton) {
+                         [progressBar setDoubleValue:0];
                          [progressView setFrame:[mainView frame]];
                          [mainView setSubviews:[NSArray arrayWithObject:progressView]];
                          
@@ -289,7 +290,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     
     [lock lock];
     [imageView setImage:nil];
-    [progressBar setIntValue:0];
     [dropView setFrame:[mainView frame]];
     [mainView setSubviews:[NSArray arrayWithObject:dropView]];
     [self performSelectorOnMainThread:@selector(restoreWindow) withObject:nil waitUntilDone:NO];
