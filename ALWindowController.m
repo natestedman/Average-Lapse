@@ -140,6 +140,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [lock unlock];
     
     for (int frame = 0; frame < totalFrameCount; frame++) {
+        NSAutoreleasePool* innerReleasePool = [[NSAutoreleasePool alloc] init];
         unsigned char* bitmap;
         NSBitmapImageRep* image;
         
@@ -220,6 +221,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             lastImage = image;
         }
 
+        [innerReleasePool release];
     }
     
     if (lastImage) {
