@@ -120,7 +120,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     long long imageCount = 0, totalFrameCount = 0;
     int imageWidth, imageHeight;
     QTMovie* movie;
-    QTTime movieEndTime, movieCurrentTime, movieStepTime;
+    QTTime movieCurrentTime, movieStepTime;
     NSBitmapImageRep* lastImage = nil;
     NSMutableDictionary* movieAttributes;
     NSMutableArray* failedFrames = [[NSMutableArray alloc] init];
@@ -140,7 +140,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         NSString* moviePath = [[NSURL URLWithString:[files lastObject]] path];
         movie = [[QTMovie alloc] initWithFile:moviePath error:nil];
         [movie setAttribute:[NSNumber numberWithBool:NO] forKey:QTMovieLoopsAttribute];
-        movieEndTime = [movie duration];
         [movie gotoBeginning];
         movieCurrentTime = [movie currentTime];
         [movie stepForward];
@@ -148,13 +147,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         [movie gotoBeginning];
         
         if (movie == nil) {
+            // TODO: We shouldn't just *die* here
             [failedFrames addObject:[[[NSDictionary alloc] initWithObjectsAndKeys:moviePath,@"file",@"Failed to load video.",@"message"] autorelease]];
             [lock release];
             [release release];
             return;
         }
         
-        totalFrameCount = movieEndTime.timeValue / movieStepTime.timeValue;
+        totalFrameCount = [movie duration].timeValue / movieStepTime.timeValue;
     }
     else {
         totalFrameCount = [files count];
