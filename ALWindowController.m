@@ -302,6 +302,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         [movie release];
     }
     
+    if (!cancel) {
+        if ([failedFrames count]) {
+            [self showFailedFramesDialog:[failedFrames retain]];
+        }
+    }
+    
     [lock lock];
     [imageView setImage:nil];
     [dropView setFrame:[mainView frame]];
@@ -320,10 +326,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                        priority:0
                                        isSticky:NO
                                    clickContext:[folder path]];
-    
-        if ([failedFrames count]) {
-            [self showFailedFramesDialog:[failedFrames retain]];
-        }
     }
     
     [lock unlock];
