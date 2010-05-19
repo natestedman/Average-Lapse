@@ -10,6 +10,7 @@
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		256AC3DA0F4B6AC300CF3369 /* ALAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 256AC3D90F4B6AC300CF3369 /* ALAppDelegate.m */; };
 		350D476611A3B1EC002571ED /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 350D476511A3B1EC002571ED /* Credits.rtf */; };
+		350D478F11A3B3CB002571ED /* license.html in Resources */ = {isa = PBXBuildFile; fileRef = 350D478E11A3B3CB002571ED /* license.html */; };
 		35BF74A7119BD46B0038FEB5 /* BWToolkitFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 35BF74A6119BD46B0038FEB5 /* BWToolkitFramework.framework */; };
 		4362861A11A28EF800FA1A3D /* Growl Registration Ticket.growlRegDict in Resources */ = {isa = PBXBuildFile; fileRef = 4362861911A28EF800FA1A3D /* Growl Registration Ticket.growlRegDict */; };
 		436286D311A29C5900FA1A3D /* ALProgressBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 436286D211A29C5900FA1A3D /* ALProgressBar.m */; };
@@ -51,6 +52,7 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		350D476511A3B1EC002571ED /* Credits.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
+		350D478E11A3B3CB002571ED /* license.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = license.html; sourceTree = "<group>"; };
 		35BF74A6119BD46B0038FEB5 /* BWToolkitFramework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BWToolkitFramework.framework; path = /Library/Frameworks/BWToolkitFramework.framework; sourceTree = "<absolute>"; };
 		4362861911A28EF800FA1A3D /* Growl Registration Ticket.growlRegDict */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Growl Registration Ticket.growlRegDict"; sourceTree = "<group>"; };
 		436286D111A29C5900FA1A3D /* ALProgressBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ALProgressBar.h; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
 				350D476511A3B1EC002571ED /* Credits.rtf */,
+				350D478E11A3B3CB002571ED /* license.html */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -217,6 +220,7 @@
 				43EB29B611A12081000E9A8C /* Drop.png in Resources */,
 				4362861A11A28EF800FA1A3D /* Growl Registration Ticket.growlRegDict in Resources */,
 				350D476611A3B1EC002571ED /* Credits.rtf in Resources */,
+				350D478F11A3B3CB002571ED /* license.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
