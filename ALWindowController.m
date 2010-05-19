@@ -131,7 +131,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     BOOL buildAll = [[threadData objectForKey:@"buildStyle"] isEqualToString:@"all"];
     
     dispatch_queue_t dispatchQueue = dispatch_get_global_queue(0, 0);
-    dispatch_group_t dispatchGroup = dispatch_group_create();
     
     if (isVideo) {
         // load the video
@@ -263,18 +262,16 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         imageCount++;
         
         if (buildAll) {
-            dispatch_group_async(dispatchGroup, dispatchQueue, ^{
-                NSData* saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
-                NSString* outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
-                [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
-                [image release];
-                
-                // TODO: I think that the displayed picture might be wrong at some point
-                // because we're doing this asynchronously. Do we care?
-                [lock lock];
-                [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
-                [lock unlock];
-            });
+            NSData* saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
+            NSString* outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
+            [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
+            [image release];
+            
+            // TODO: I think that the displayed picture might be wrong at some point
+            // because we're doing this asynchronously. Do we care?
+            [lock lock];
+            [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
+            [lock unlock];
         }
         else {
             if (lastImage) {
@@ -304,8 +301,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     if (isVideo) {
         [movie release];
     }
-    
-    dispatch_group_wait(dispatchGroup, DISPATCH_TIME_FOREVER);
     
     [lock lock];
     [imageView setImage:nil];
