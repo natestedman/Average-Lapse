@@ -37,11 +37,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     NSRect targetSize;
     
     BOOL cancel;
+    
+    NSLock* lock;
 }
 
 -(void)generate:(NSArray*)files;
 -(void)thread:(NSDictionary*)threadData;
 
+-(void)resizeWindowToFitImage:(NSBitmapImageRep *)image;
 -(void)enlargeWindow;
 -(void)restoreWindow;
 

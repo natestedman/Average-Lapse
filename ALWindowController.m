@@ -112,7 +112,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -(void)thread:(NSDictionary*)threadData {
     NSAutoreleasePool* release = [[NSAutoreleasePool alloc] init];
-    NSLock* lock = [[NSRecursiveLock alloc] init];
+    lock = [[NSRecursiveLock alloc] init];
     BOOL started = NO;
     cancel = NO;
     long long size;
@@ -223,33 +223,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             imageHeight = [image pixelsHigh];
             size = imageWidth * imageHeight;
             
-            // animate the size of the window
-            [lock lock];
-            
-            NSRect rect = [[self window] frame];
-            
-            // save the origin size so that it can be restoed
-            originalSize = rect;
-            
-            float width = fmin(DISPLAY_WIDTH, imageWidth);
-            float height = width * ((float)imageHeight / imageWidth) +
-                           rect.size.height - [imageView frame].size.height;
-            
-            if (height < [[self window] minSize].height) {
-                width *= [[self window] minSize].height / height;
-                height *= [[self window] minSize].height / height;
-            }
-            
-            rect.origin.x += (rect.size.width - width) / 2;
-            rect.origin.y += (rect.size.height - height) / 2;
-            rect.size.width = width;
-            rect.size.height = height;
-            
-            targetSize = rect;
-            
-            [self performSelectorOnMainThread:@selector(enlargeWindow) withObject:nil waitUntilDone:NO];
-            
-            [lock unlock];
+            [self resizeWindowToFitImage:image];
             
             accumulator = (unsigned char*)calloc(size * 4, sizeof(unsigned char));
             
@@ -339,6 +313,41 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [lock release];
     [failedFrames release];
     [release release];
+}
+
+-(void)resizeWindowToFitImage:(NSBitmapImageRep *)image {
+    [lock lock];
+    
+    NSRect rect;
+    int imageWidth, imageHeight;
+    
+    imageWidth = [image pixelsWide];
+    imageHeight = [image pixelsHigh];
+    rect = [[self window] frame];
+    
+    // save the origin size so that it can be restored later
+    originalSize = rect;
+    
+    float width = fmin(DISPLAY_WIDTH, imageWidth);
+    float height = width * ((float)imageHeight / imageWidth) +
+        rect.size.height - [imageView frame].size.height;
+    
+    if (height < [[self window] minSize].height) {
+        width *= [[self window] minSize].height / height;
+        height *= [[self window] minSize].height / height;
+    }
+    
+    // adjust new window frame to resize outward from the current center
+    rect.origin.x += (rect.size.width - width) / 2;
+    rect.origin.y += (rect.size.height - height) / 2;
+    rect.size.width = width;
+    rect.size.height = height;
+    
+    targetSize = rect;
+    
+    [self performSelectorOnMainThread:@selector(enlargeWindow) withObject:nil waitUntilDone:NO];
+    
+    [lock unlock];
 }
 
 -(void)enlargeWindow {
