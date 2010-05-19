@@ -120,7 +120,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     int imageWidth, imageHeight;
     QTMovie* movie;
     QTTime movieCurrentTime, movieStepTime;
-    NSBitmapImageRep* lastImage = nil;
+    NSBitmapImageRep* previousImage = nil;
     NSMutableDictionary* movieAttributes;
     NSMutableArray* failedFrames = [[NSMutableArray alloc] init];
     
@@ -266,6 +266,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         imageCount++;
         
         if (buildAll) {
+            // output the current frame of the accumulator buffer to disk
             NSData* saveData = [image representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
             NSString* outputFilename = [NSString stringWithFormat:@"Average Lapse Frame %i.jpg", imageCount];
             [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
@@ -276,24 +277,21 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             [lock unlock];
         }
         else {
-            if (lastImage) {
-                [lastImage release];
+            if (previousImage) {
+                [previousImage release];
             }
             
-            lastImage = image;
+            previousImage = image;
         }
 
         [innerReleasePool release];
     }
     
-    if (lastImage) {
-        // Build and output the last frame
-        if (!buildAll) {
-            NSData* saveData = [lastImage representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
-            [saveData writeToURL:[folder URLByAppendingPathComponent:@"Average Lapse Final Frame.jpg"] atomically:YES];
-        }
-        
-        [lastImage release];
+    if (!buildAll && previousImage) {
+        // build and output the last frame, if we're only building one frame
+        NSData* saveData = [previousImage representationUsingType:NSJPEGFileType properties:JPEG_PROPERTIES];
+        [saveData writeToURL:[folder URLByAppendingPathComponent:@"Average Lapse Final Frame.jpg"] atomically:YES];
+        [previousImage release];
     }
         
     if (accumulator) {
