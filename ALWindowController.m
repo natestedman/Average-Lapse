@@ -267,8 +267,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             [saveData writeToURL:[folder URLByAppendingPathComponent:outputFilename] atomically:YES];
             [image release];
             
-            // TODO: I think that the displayed picture might be wrong at some point
-            // because we're doing this asynchronously. Do we care?
             [lock lock];
             [imageView setImage:[[[NSImage alloc] initWithData:saveData] autorelease]];
             [lock unlock];
