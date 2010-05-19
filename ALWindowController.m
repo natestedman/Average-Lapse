@@ -66,8 +66,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                          [threadData setObject:files forKey:@"files"];
                          [threadData setObject:[[open URLs] lastObject] forKey:@"outputURL"];
                          
-                         if([buildStyle selectedSegment] == 0)
-                         {
+                         if([buildStyle selectedSegment] == 0) {
                              [threadData setObject:@"all" forKey:@"buildStyle"];
                          }
                          else {
@@ -136,14 +135,22 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     
     if (isVideo) {
         // load the video
+        // TODO: support averaging multiple videos?
         [QTMovie enterQTKitOnThread];
         NSString* moviePath = [[NSURL URLWithString:[files lastObject]] path];
         movie = [[QTMovie alloc] initWithFile:moviePath error:nil];
+        
+        // disable looping, in case the video was created with that enabled
         [movie setAttribute:[NSNumber numberWithBool:NO] forKey:QTMovieLoopsAttribute];
+        
+        // determine the timestep of one frame; this is a hack and will fail
+        // silently for any video with a dynamic framerate
         [movie gotoBeginning];
         movieCurrentTime = [movie currentTime];
         [movie stepForward];
         movieStepTime = [movie currentTime];
+        
+        // start at the first frame of the movie
         [movie gotoBeginning];
         
         if (movie == nil) {
@@ -154,9 +161,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             return;
         }
         
+        // estimate the total number of frames, based on the timestep we
+        // calculated before and the total duration of the movie; this will
+        // fail like the timestep calculation on movies with dynamic framerates
         totalFrameCount = [movie duration].timeValue / movieStepTime.timeValue;
     }
     else {
+        // the number of frames with an image sequence is the number of files
         totalFrameCount = [files count];
     }
     
@@ -172,9 +183,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             break;
         }
         
-        NSAutoreleasePool* innerReleasePool = [[NSAutoreleasePool alloc] init];
+        NSAutoreleasePool* innerReleasePool;
         unsigned char* bitmap;
         NSBitmapImageRep* image;
+        NSString* errorPath;
+        
+        // create an autorelease pool for the inner loop; this is necessary
+        // primarily to cleanup after various automatically autoreleased objects
+        // which otherwise very quickly consume a great deal of memory
+        innerReleasePool = [[NSAutoreleasePool alloc] init];
         
         [lock lock];
         [progressBar setDoubleValue:frame];
@@ -192,8 +209,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             image = [[NSBitmapImageRep alloc] initWithData:data];
             [data release];
         }
-        
-        NSString* errorPath;
         
         if (isVideo) {
             errorPath = [[NSURL URLWithString:[files lastObject]] path];
