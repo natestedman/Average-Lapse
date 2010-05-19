@@ -29,7 +29,7 @@
     NSRect rect = [self bounds];
     rect.size.height--;
     
-    NSBezierPath* borderPath = [NSBezierPath bezierPathWithRoundedRect:rect
+    NSBezierPath* borderPath = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(rect, 0.5, 0.5)
                                                          xRadius:4
                                                          yRadius:4];
     rect.origin.y--;
@@ -46,8 +46,8 @@
     rect.size.width *= (float)([self doubleValue] / [self maxValue]);
     
     NSBezierPath* progressPath = [NSBezierPath bezierPathWithRoundedRect:rect
-                                                                 xRadius:2
-                                                                 yRadius:2];
+                                                                 xRadius:3
+                                                                 yRadius:3];
     
     NSGradient* grad;
     NSGradient* progressGrad;
@@ -75,7 +75,7 @@
     }
     
     [[NSGraphicsContext currentContext] saveGraphicsState];
-	[[NSGraphicsContext currentContext] setShouldAntialias: NO];
+	[[NSGraphicsContext currentContext] setShouldAntialias: YES];
     
     // draw the highlight
     [lightPath stroke];
