@@ -123,6 +123,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     QTTime movieEndTime, movieCurrentTime, movieStepTime;
     NSBitmapImageRep* lastImage = nil;
     NSMutableDictionary* movieAttributes;
+    NSMutableArray* failedFrames = [[NSMutableArray alloc] init];
     
     // extract data from the dictionary
     NSArray* files = [threadData objectForKey:@"files"];
@@ -136,7 +137,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     if (isVideo) {
         // load the video
         [QTMovie enterQTKitOnThread];
-        movie = [[QTMovie alloc] initWithFile:[[NSURL URLWithString:[files lastObject]] path] error:nil];
+        NSString* moviePath = [[NSURL URLWithString:[files lastObject]] path];
+        movie = [[QTMovie alloc] initWithFile:moviePath error:nil];
         [movie setAttribute:[NSNumber numberWithBool:NO] forKey:QTMovieLoopsAttribute];
         movieEndTime = [movie duration];
         [movie gotoBeginning];
@@ -146,7 +148,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         [movie gotoBeginning];
         
         if (movie == nil) {
-            NSLog(@"Failed to load video.");
+            [failedFrames addObject:[[[NSDictionary alloc] initWithObjectsAndKeys:moviePath,@"file",@"Failed to load video.",@"message"] autorelease]];
             [lock release];
             [release release];
             return;
@@ -191,15 +193,24 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             [data release];
         }
         
+        NSString* errorPath;
+        
+        if (isVideo) {
+            errorPath = [[NSURL URLWithString:[files lastObject]] path];
+        }
+        else {
+            errorPath = [[NSURL URLWithString:[files objectAtIndex:frame]] path];
+        }
+        
         if (image == nil) {
-            NSLog(@"Skipped (couldn't load image).");
+            [failedFrames addObject:[[[NSDictionary alloc] initWithObjectsAndKeys:errorPath,@"file",@"Failed to load image.",@"message"] autorelease]];
             continue;
         }
         
         if (started &&
             (imageWidth != [image pixelsWide] ||
              imageHeight != [image pixelsHigh])) {
-            NSLog(@"Skipped (size doesn't match).");
+            [failedFrames addObject:[[[NSDictionary alloc] initWithObjectsAndKeys:errorPath,@"file",@"Image size doesn't match first frame.",@"message"] autorelease]];
             [image release];
             continue;
         }
@@ -326,6 +337,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     
     [lock unlock];
     [lock release];
+    [failedFrames release];
     [release release];
 }
 
