@@ -22,36 +22,39 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVE
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#import <Cocoa/Cocoa.h>
 #import "ALErrorView.h"
 
-@interface ALWindowController : NSWindowController {
-    IBOutlet NSView* mainView;
-    IBOutlet NSView* dropView;
-    IBOutlet NSView* progressView;
-    IBOutlet NSProgressIndicator* progressBar;
-    IBOutlet NSImageView* imageView;
-    IBOutlet NSSegmentedControl* buildStyle;
-    IBOutlet ALErrorView* errorView;
-    
-    NSRect originalSize;
-    NSRect targetSize;
-    
-    BOOL cancel;
-    
-    NSLock* lock;
+@implementation ALErrorView
+
+@synthesize failedFrames;
+
+-(id)initWithFrame:(NSRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        // Initialization code here.
+    }
+    return self;
 }
 
--(void)generate:(NSArray*)files;
--(void)thread:(NSDictionary*)threadData;
+-(void)drawRect:(NSRect)dirtyRect {
+    // Drawing code here.
+}
 
--(void)resizeWindowToFitImage:(NSBitmapImageRep *)image;
--(void)enlargeWindow;
--(void)restoreWindow;
+-(void)setFailedFrames:(NSArray *)inFailedFrames {
+    failedFrames = inFailedFrames;
+    
+    [tableView reloadData];
+}
 
--(void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
--(void)showFailedFramesDialog:(NSArray*)failedFrames;
+-(int)numberOfRowsInTableView:(NSTableView *)tableView
+{
+    return [failedFrames count];
+}
 
--(IBAction)cancelAction:(id)sender;
+-(id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row
+{
+    // TODO: display information about what kind of failure happened
+    return [[failedFrames objectAtIndex:row] objectForKey:@"file"];
+}
 
 @end

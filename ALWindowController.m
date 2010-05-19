@@ -320,6 +320,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                        priority:0
                                        isSticky:NO
                                    clickContext:[folder path]];
+    
+        if ([failedFrames count]) {
+            [self showFailedFramesDialog:[failedFrames retain]];
+        }
     }
     
     [lock unlock];
@@ -328,7 +332,27 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [release release];
 }
 
--(void)resizeWindowToFitImage:(NSBitmapImageRep *)image {
+-(void)showFailedFramesDialog:(NSArray*)failedFrames {
+    errorView.failedFrames = failedFrames;
+    
+    NSAlert *error = [[[NSAlert alloc] init] autorelease];
+    [error addButtonWithTitle:@"OK"];
+    [error setMessageText:@"Some frames failed to render."];
+    // TODO: someone besides me needs to write some words (render? load? runon? help!)
+    [error setInformativeText:@"The following frames failed to render; this could be caused by corrupt files or images of differing sizes."];
+    [error setAlertStyle:NSWarningAlertStyle];
+    [error setAccessoryView:errorView];
+    [error beginSheetModalForWindow:[self window]
+                      modalDelegate:self
+                     didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
+                        contextInfo:nil];
+}
+
+-(void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+    [[alert window] orderOut:self];
+}
+
+-(void)resizeWindowToFitImage:(NSBitmapImageRep*)image {
     [lock lock];
     
     NSRect rect;

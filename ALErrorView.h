@@ -23,35 +23,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #import <Cocoa/Cocoa.h>
-#import "ALErrorView.h"
 
-@interface ALWindowController : NSWindowController {
-    IBOutlet NSView* mainView;
-    IBOutlet NSView* dropView;
-    IBOutlet NSView* progressView;
-    IBOutlet NSProgressIndicator* progressBar;
-    IBOutlet NSImageView* imageView;
-    IBOutlet NSSegmentedControl* buildStyle;
-    IBOutlet ALErrorView* errorView;
+// I hear you like doing MVC entirely wrong.
+
+@interface ALErrorView : NSView {
+    IBOutlet NSTableView* tableView;
     
-    NSRect originalSize;
-    NSRect targetSize;
-    
-    BOOL cancel;
-    
-    NSLock* lock;
+    NSArray* failedFrames;
 }
 
--(void)generate:(NSArray*)files;
--(void)thread:(NSDictionary*)threadData;
-
--(void)resizeWindowToFitImage:(NSBitmapImageRep *)image;
--(void)enlargeWindow;
--(void)restoreWindow;
-
--(void)alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
--(void)showFailedFramesDialog:(NSArray*)failedFrames;
-
--(IBAction)cancelAction:(id)sender;
+@property (nonatomic,retain) NSArray* failedFrames;
 
 @end
