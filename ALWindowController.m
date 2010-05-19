@@ -166,11 +166,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [movieAttributes setObject:QTMovieFrameImageTypeNSImage forKey:QTMovieFrameImageType];
     
     for (long long frame = 0; frame < totalFrameCount; frame++) {
-        [lock lock];
         if (cancel) {
             break;
         }
-        [lock unlock];
         
         NSAutoreleasePool* innerReleasePool = [[NSAutoreleasePool alloc] init];
         unsigned char* bitmap;
