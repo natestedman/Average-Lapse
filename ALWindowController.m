@@ -302,15 +302,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         [movie release];
     }
     
-    [lock lock];
-    if (!cancel) {
-        [lock unlock];
-        dispatch_group_wait(dispatchGroup, DISPATCH_TIME_FOREVER);
-    }
-    else {
-        [lock unlock];
-    }
-
+    dispatch_group_wait(dispatchGroup, DISPATCH_TIME_FOREVER);
     
     [lock lock];
     [imageView setImage:nil];
