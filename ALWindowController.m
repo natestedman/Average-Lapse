@@ -234,28 +234,32 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         
         bitmap = [image bitmapData];
         
-        // if this is the first image, initialize the arrays
         if (!started) {
+            // if this is the first image, initialize various data structures
             imageWidth = [image pixelsWide];
             imageHeight = [image pixelsHigh];
             size = imageWidth * imageHeight;
             
             [self resizeWindowToFitImage:image];
             
+            // create the running average accumulator buffer
             accumulator = (unsigned char*)calloc(size * 4, sizeof(unsigned char));
             
+            // copy the first frame directly into the accumulator buffer
             memcpy(accumulator, bitmap, size * 4);
             
             started = YES;
         }
-        else { // otherwise, average the images
+        else {
+            // average the images, dispatching a block for each row
             dispatch_apply(imageHeight, dispatchQueue, ^(size_t y){
-                for (size_t i = (y * imageWidth * 4); i < (y * imageWidth * 4) + (imageWidth * 4); i++) {
-                    // average this image's color with the previous colors
+                // add our row of the current image into the running average
+                for (size_t i = (y * imageWidth * 4); i < ((y + 1) * imageWidth * 4); i++) {
                     accumulator[i] = (accumulator[i] * imageCount + bitmap[i]) / (imageCount + 1);
                 }
             });
             
+            // copy the current running average into the output bitmap
             memcpy(bitmap, accumulator, size * 4);
         }
         
