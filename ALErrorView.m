@@ -54,7 +54,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -(id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(int)row
 {
     // TODO: display information about what kind of failure happened
-    return [[failedFrames objectAtIndex:row] objectForKey:@"file"];
+    NSURL* url = [NSURL URLWithString:[[failedFrames objectAtIndex:row] objectForKey:@"file"]];
+    return [url lastPathComponent];
 }
 
 @end
